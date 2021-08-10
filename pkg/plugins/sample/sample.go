@@ -39,7 +39,7 @@ func (pl *Sample) Name() string {
 }
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
-	klog.Infof("Prefilter pod : %v", pod.Name)
+	klog.Infof("PREFILTER POD : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
@@ -48,12 +48,12 @@ func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
 }
 
 func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
-	klog.Infof("Filter pod : %v", pod.Name)
+	klog.Infof("FILTER POD : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
-	klog.Infof("Scoring pod : %v", pod.Name)
+	klog.Infof("SCORING POD : %v", pod.Name)
 	return 0, framework.NewStatus(framework.Success, "")
 }
 
@@ -62,12 +62,12 @@ func (pl *Sample) ScoreExtensions() framework.ScoreExtensions {
 }
 
 func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
-	klog.V(3).Infof("Reserve the pod: %v", pod.Name)
+	klog.V(3).Infof("RESERVE THE POD: %v", pod.Name)
 	return nil
 }
 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
-	klog.V(3).Infof("Permit allows the pod: %v", pod.Name)
+	klog.V(3).Infof("PERMIT ALLOWS THE POD: %v", pod.Name)
 	return framework.NewStatus(framework.Success, ""), 0
 }
 
@@ -76,12 +76,12 @@ func (pl *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod 
 	// if err != nil {
 	// 	return framework.NewStatus(framework.Error, err.Error())
 	// }
-	klog.Infof("Prebind node : %v", pod.Name)
+	klog.Infof("PREBIND NODE : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
-	klog.Infof("Postbind node : %v", pod.Name)
+	klog.Infof("POSTBIND NODE : %v", pod.Name)
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
