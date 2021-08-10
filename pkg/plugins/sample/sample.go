@@ -35,7 +35,7 @@ func (s *Sample) Name() string {
 }
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
-	klog.V(3).Infof("Prefilter pod : %v", pod.Name)
+	klog.Infof("Prefilter pod : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
@@ -44,12 +44,12 @@ func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
 }
 
 func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
-	klog.V(3).Infof("Filter pod : %v", pod.Name)
+	klog.Infof("Filter pod : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
-	klog.V(3).Infof("Scoring pod : %v", pod.Name)
+	klog.Infof("Scoring pod : %v", pod.Name)
 	return 0, framework.NewStatus(framework.Success, nodeName)
 }
 
@@ -62,7 +62,7 @@ func (s *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod *
 	// if err != nil {
 	// 	return framework.NewStatus(framework.Error, err.Error())
 	// }
-	klog.V(3).Infof("Prebind node : %v", pod.Name)
+	klog.Infof("Prebind node : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
@@ -71,7 +71,7 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 	if err := framework.DecodeInto(plArgs, args); err != nil {
 		return nil, err
 	}
-	klog.V(3).Infof("--------> args: %+v", args)
+	klog.Infof("--------> args: %+v", args)
 	return &Sample{
 		args:   args,
 		handle: handle,
