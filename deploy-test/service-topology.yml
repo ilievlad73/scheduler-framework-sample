@@ -14,6 +14,8 @@ spec:
       labels:
         app: http-server
         tier: web
+        depends-on: http-server-new__http-server-mobile__http-mobile-workload
+        scheduleTimeoutSeconds: "30"
     spec:
       schedulerName: scheduler-framework-sample
       containers:
