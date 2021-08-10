@@ -28,18 +28,6 @@ type Sample struct {
 	handle framework.FrameworkHandle
 }
 
-func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
-	args := &Args{}
-	if err := framework.DecodeInto(plArgs, args); err != nil {
-		return nil, err
-	}
-	klog.V(3).Infof("--------> args: %+v", args)
-	return &Sample{
-		args:   args,
-		handle: handle,
-	}, nil
-}
-
 func (s *Sample) Name() string {
 	return Name
 }
@@ -56,4 +44,16 @@ func (s *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod *
 	}
 	klog.V(3).Infof("prebind node info: %+v", nodeInfo.Node())
 	return framework.NewStatus(framework.Success, "")
+}
+
+func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
+	args := &Args{}
+	if err := framework.DecodeInto(plArgs, args); err != nil {
+		return nil, err
+	}
+	klog.V(3).Infof("--------> args: %+v", args)
+	return &Sample{
+		args:   args,
+		handle: handle,
+	}, nil
 }
