@@ -14,8 +14,6 @@ spec:
       labels:
         app: backend
         tier: web
-        depends-on: backend-new__backend-mobile__http-mobile-workload
-        scheduleTimeoutSeconds: "30"
     spec:
       schedulerName: scheduler-framework-sample
       containers:
