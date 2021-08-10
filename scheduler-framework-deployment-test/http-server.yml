@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpserver
+  labels:
+    app: http-server
+spec:
+  selector:
+    matchLabels:
+      app: http-server
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: http-server
+        tier: web
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: http-server
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
