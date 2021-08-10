@@ -2,6 +2,7 @@ package sample
 
 import (
 	"context"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,13 +25,16 @@ var _ framework.PreFilterPlugin = &Sample{}
 var _ framework.FilterPlugin = &Sample{}
 var _ framework.PreBindPlugin = &Sample{}
 var _ framework.ScorePlugin = &Sample{}
+var _ framework.PermitPlugin = &Sample{}
+var _ framework.ReservePlugin = &Sample{}
+var _ framework.PostBindPlugin = &Sample{}
 
 type Sample struct {
 	args   *Args
 	handle framework.FrameworkHandle
 }
 
-func (s *Sample) Name() string {
+func (pl *Sample) Name() string {
 	return Name
 }
 
@@ -50,20 +54,34 @@ func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v
 
 func (pl *Sample) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
 	klog.Infof("Scoring pod : %v", pod.Name)
-	return 0, framework.NewStatus(framework.Success, nodeName)
+	return 0, framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) ScoreExtensions() framework.ScoreExtensions {
 	return nil
 }
 
-func (s *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
+func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
+	klog.V(3).Infof("Reserve the pod: %v", pod.Name)
+	return nil
+}
+
+func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
+	klog.V(3).Infof("Permit allows the pod: %v", pod.Name)
+	return framework.NewStatus(framework.Success, ""), 0
+}
+
+func (pl *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
 	// nodeInfo, err := s.handle.SnapshotSharedLister().NodeInfos().Get(nodeName)
 	// if err != nil {
 	// 	return framework.NewStatus(framework.Error, err.Error())
 	// }
 	klog.Infof("Prebind node : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
+}
+
+func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
+	klog.Infof("Postbind node : %v", pod.Name)
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
