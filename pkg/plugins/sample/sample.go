@@ -38,6 +38,10 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	return framework.NewStatus(framework.Success, "")
 }
 
+func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
+	return nil
+}
+
 func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
 	klog.V(3).Infof("filter pod: %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
