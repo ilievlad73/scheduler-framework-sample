@@ -20,3 +20,8 @@ $ make image
 ```shell
 $ kubectl apply -f ./deploy/
 ```
+
+## Useful commands
+```shell
+$ kubectl logs $(kubectl get pods -A | grep scheduler-framework | awk -F ' ' '{print $2}') -n kube-system -f
+```

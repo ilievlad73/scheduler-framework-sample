@@ -36,10 +36,10 @@ image: build-linux
 publish: image
 	docker push vladalv/scheduler-framework-sample:v1
 
-deploy: image
+deploy: publish
 	kubectl apply -f ./deploy
 
-rollout-restart: image
+rollout-restart: publish
 	kubectl rollout restart deployment/scheduler-framework-sample -n kube-system
 
 image-server:
@@ -48,7 +48,10 @@ image-server:
 publish-server: image-server
 	docker push vladalv/http-server:v1
 
-rollout-restart-server: image-server
+rollout-restart-server: publish-server
+	kubectl rollout restart deployment/httpserver
+
+rollout-restart-server-no-publish: 
 	kubectl rollout restart deployment/httpserver
 
 update:
