@@ -75,6 +75,11 @@ func getPodDependencies(pod *v1.Pod) []string {
 	return removeEmptyStrings(strings.Split(labelsString, "__"))
 }
 
+func getPodDependencyOff(pod *v1.Pod) []string {
+	labelsString := pod.Labels["dependency-off"]
+	return removeEmptyStrings(strings.Split(labelsString, "__"))
+}
+
 func isPodBind(podName string, bindMap map[string]bool) bool {
 	isBind, ok := bindMap[podName]
 	if ok != true {
