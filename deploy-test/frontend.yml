@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: frontend
+        tier: web
+        depends-on: backend
+        scheduleTimeoutSeconds: "30"
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: frontend
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080

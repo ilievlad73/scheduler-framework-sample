@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: httpserver
+  name: backend
   labels:
-    app: http-server
+    app: backend
 spec:
   selector:
     matchLabels:
-      app: http-server
+      app: backend
       tier: web
   template:
     metadata:
       labels:
-        app: http-server
+        app: backend
         tier: web
-        depends-on: http-server-new__http-server-mobile__http-mobile-workload
+        depends-on: backend-new__backend-mobile__http-mobile-workload
         scheduleTimeoutSeconds: "30"
     spec:
       schedulerName: scheduler-framework-sample
       containers:
-        - name: http-server
+        - name: backend
           image: vladalv/http-server:v1
           ports:
             - containerPort: 8080
