@@ -50,6 +50,10 @@ func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
 	return timeoutSeconds
 }
 
+func getPodTopology(pod *v1.Pod) string {
+	return pod.Labels["topology"]
+}
+
 func getPodDependencies(pod *v1.Pod) []string {
 	labelsString := pod.Labels["depends-on"]
 	return strings.Split(labelsString, "__")
@@ -61,6 +65,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	/* log important labels */
 	klog.V(3).Infoln("Schedule timeout seconds %v", getPodScheduleTimeoutLabel(pod))
 	klog.V(3).Infoln("Pod dependencies %v", getPodDependencies(pod))
+	klog.V(3).Infoln("Pod topolofy: %v", getPodTopology(pod))
 
 	return framework.NewStatus(framework.Success, "")
 }

@@ -4,8 +4,9 @@ go 1.16
 
 require (
 	github.com/spf13/cobra v0.0.5
-	k8s.io/api v0.17.3
-	k8s.io/apimachinery v0.17.3
+	k8s.io/api v0.22.0
+	k8s.io/apimachinery v0.22.0
+	k8s.io/component-helpers v0.22.0 // indirect
 	k8s.io/klog v1.0.0
 	k8s.io/kubernetes v1.17.3
 )
