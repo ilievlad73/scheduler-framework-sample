@@ -33,14 +33,23 @@ build-linux: init
 image: build-linux
 	docker build --no-cache . -t vladalv/scheduler-framework-sample:v1
 
-publish-image: image
+publish: image
 	docker push vladalv/scheduler-framework-sample:v1
 
-build-http-server:
+deploy: image
+	kubectl apply -f ./deploy
+
+rollout-restart:
+	kubectl rollout restart deployment/scheduler-framework-sample -n kube-system
+
+build-server:
 	docker build -t vladalv/http-server:v1 ./http-server
 
-publish-http-server:
+publish-server:
 	docker push vladalv/http-server:v1
+
+rollout-restart-server:
+	kubectl rollout restart deployment/httpserver
 
 update:
 	go mod download
