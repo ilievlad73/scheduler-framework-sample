@@ -20,6 +20,7 @@ type Args struct {
 	Master     string `json:"master,omitempty"`
 }
 
+var _ framework.PreFilterPlugin = &Sample{}
 var _ framework.FilterPlugin = &Sample{}
 var _ framework.PreBindPlugin = &Sample{}
 
@@ -30,6 +31,11 @@ type Sample struct {
 
 func (s *Sample) Name() string {
 	return Name
+}
+
+func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
+	klog.V(3).Infof("prefilter pod: %v", pod.Name)
+	return framework.NewStatus(framework.Success, "")
 }
 
 func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
