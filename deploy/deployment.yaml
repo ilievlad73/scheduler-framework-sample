@@ -48,8 +48,8 @@ spec:
           name: scheduler-config
       containers:
       - name: scheduler-ctrl
-        image: scheduler-framework-sample:f99aae8
-        imagePullPolicy: IfNotPresent
+        image: vladalv/scheduler-framework-sample:v1
+        imagePullPolicy: Always
         args:
         - scheduler-framework-sample
         - --config=/scheduler/scheduler-config.yaml

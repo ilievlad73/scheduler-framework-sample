@@ -31,7 +31,7 @@ build-linux: init
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o=${BIN_DIR}/scheduler-framework-sample ./cmd/scheduler
 
 image: build-linux
-	docker build --no-cache . -t scheduler-framework-sample:$(TAG)
+	docker build --no-cache . -t vladalv/scheduler-framework-sample:v1
 
 update:
 	go mod download
