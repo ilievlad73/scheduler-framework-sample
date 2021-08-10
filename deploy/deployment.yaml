@@ -13,12 +13,27 @@ data:
       lockObjectName: scheduler-framework-sample
       lockObjectNamespace: kube-system
     plugins:
+      preFilter:
+        enabled:
+        - name: "sample"
       filter:
         enabled:
         - name: "sample"
+      score:
+        enabled:
+          - name: "sample"
+      reserve:
+        enabled:
+          - name: "sample"
+      permit:
+        enabled:
+          - name: "sample"
       preBind:
         enabled:
         - name: "sample"
+      postBind:
+        enabled:
+          - name: "sample"
     pluginConfig:
     - name: "sample"
       args: {"master": "master", "kubeconfig": "kubeconfig"}
