@@ -2,6 +2,7 @@ package sample
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -38,8 +39,22 @@ func (pl *Sample) Name() string {
 	return Name
 }
 
+func getPodScheduleTimeoutLabel(pod *v1.Pod) string {
+	return pod.Labels["scheduleTimeoutSeconds"]
+}
+
+func getPodDependencies(pod *v1.Pod) []string {
+	labelsString := pod.Labels["depends-on"]
+	return strings.Split(labelsString, "__")
+}
+
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
 	klog.V(3).Infof("PREFILTER POD : %v", pod.Name)
+
+	/* log important labels */
+	klog.V(3).Infoln("Schedule timeout seconds %v", getPodScheduleTimeoutLabel(pod))
+	klog.V(3).Infoln("Pod dependencies %v", getPodDependencies(pod))
+
 	return framework.NewStatus(framework.Success, "")
 }
 
