@@ -39,16 +39,16 @@ publish: image
 deploy: image
 	kubectl apply -f ./deploy
 
-rollout-restart:
+rollout-restart: image
 	kubectl rollout restart deployment/scheduler-framework-sample -n kube-system
 
-build-server:
+image-server:
 	docker build -t vladalv/http-server:v1 ./http-server
 
-publish-server:
+publish-server: image-server
 	docker push vladalv/http-server:v1
 
-rollout-restart-server:
+rollout-restart-server: image-server
 	kubectl rollout restart deployment/httpserver
 
 update:
