@@ -33,6 +33,9 @@ build-linux: init
 image: build-linux
 	docker build --no-cache . -t vladalv/scheduler-framework-sample:v1
 
+publish-image: image
+	docker push vladalv/scheduler-framework-sample:v1
+
 update:
 	go mod download
 	go mod tidy
