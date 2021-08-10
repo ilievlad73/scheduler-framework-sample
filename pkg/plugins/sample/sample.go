@@ -23,6 +23,7 @@ type Args struct {
 var _ framework.PreFilterPlugin = &Sample{}
 var _ framework.FilterPlugin = &Sample{}
 var _ framework.PreBindPlugin = &Sample{}
+var _ framework.ScorePlugin = &Sample{}
 
 type Sample struct {
 	args   *Args
@@ -34,7 +35,7 @@ func (s *Sample) Name() string {
 }
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
-	klog.V(3).Infof("Prefilter pod: %v", pod.Name)
+	klog.V(3).Infof("Prefilter pod : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
@@ -43,8 +44,17 @@ func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
 }
 
 func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
-	klog.V(3).Infof("Filter pod: %v", pod.Name)
+	klog.V(3).Infof("Filter pod : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
+}
+
+func (pl *Sample) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
+	klog.V(3).Infof("Scoring pod : %v", pod.Name)
+	return 0, framework.NewStatus(framework.Success, nodeName)
+}
+
+func (pl *Sample) ScoreExtensions() framework.ScoreExtensions {
+	return nil
 }
 
 func (s *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
@@ -52,7 +62,7 @@ func (s *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod *
 	// if err != nil {
 	// 	return framework.NewStatus(framework.Error, err.Error())
 	// }
-	klog.V(3).Infof("Prebind node: %v", pod.Name)
+	klog.V(3).Infof("Prebind node : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
