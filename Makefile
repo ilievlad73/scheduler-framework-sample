@@ -36,6 +36,12 @@ image: build-linux
 publish-image: image
 	docker push vladalv/scheduler-framework-sample:v1
 
+build-http-server:
+	docker build -t vladalv/http-server:v1 ./http-server
+
+publish-http-server:
+	docker push vladalv/http-server:v1
+
 update:
 	go mod download
 	go mod tidy
