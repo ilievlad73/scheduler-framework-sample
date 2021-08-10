@@ -32,14 +32,16 @@ var _ framework.ReservePlugin = &Sample{}
 var _ framework.PostBindPlugin = &Sample{}
 
 type Sample struct {
-	args   *Args
-	handle framework.FrameworkHandle
+	args    *Args
+	handle  framework.FrameworkHandle
+	bindMap map[string]bool
 }
 
 func (pl *Sample) Name() string {
 	return Name
 }
 
+/* UTILS */
 func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
 	scheduleTimeoutSeconds := pod.Labels["scheduleTimeoutSeconds"]
 	timeoutSeconds, err := strconv.Atoi(scheduleTimeoutSeconds)
@@ -50,24 +52,85 @@ func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
 	return timeoutSeconds
 }
 
+func getPodAppName(pod *v1.Pod) string {
+	return pod.Labels["app"]
+}
+
 func getPodTopology(pod *v1.Pod) string {
 	return pod.Labels["topology"]
 }
 
+func removeEmptyStrings(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
+
 func getPodDependencies(pod *v1.Pod) []string {
 	labelsString := pod.Labels["depends-on"]
-	return strings.Split(labelsString, "__")
+	return removeEmptyStrings(strings.Split(labelsString, "__"))
 }
+
+func isPodBind(podName string, bindMap map[string]bool) bool {
+	isBind, ok := bindMap[podName]
+	if ok != true {
+		return false
+	}
+
+	return isBind
+}
+
+func markPodBind(podName string, bindMap map[string]bool) {
+	bindMap[podName] = true
+}
+
+func markPodUnBind(podName string, bindMap map[string]bool) {
+	delete(bindMap, podName)
+}
+
+func checkAllDependenciesBind(podNames []string, bindMap map[string]bool) bool {
+	for _, s := range podNames {
+		if isPodBind(s, bindMap) == false {
+
+			return false
+		}
+	}
+
+	return true
+}
+
+/* END UTILS */
+
+// TODO: sort pods form queue based on priority, topology key, and creation time
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
 	klog.V(3).Infof("PREFILTER POD : %v", pod.Name)
 
-	/* log important labels */
-	klog.V(3).Infoln("Schedule timeout seconds %v", getPodScheduleTimeoutLabel(pod))
-	klog.V(3).Infoln("Pod dependencies %v", getPodDependencies(pod))
-	klog.V(3).Infoln("Pod topolofy: %v", getPodTopology(pod))
+	scheduleTimeout := getPodScheduleTimeoutLabel(pod)
+	podDependencies := getPodDependencies(pod)
+	topology := getPodTopology(pod)
+	appName := getPodAppName(pod)
 
-	return framework.NewStatus(framework.Success, "")
+	/* log important labels */
+	klog.V(3).Infoln("Schedule timeout seconds %v", scheduleTimeout)
+	klog.V(3).Infoln("Pod dependencies %v", podDependencies)
+	klog.V(3).Infoln("Pod dependencies len %v", len(podDependencies))
+	klog.V(3).Infoln("Pod topolofy: %v", topology)
+	klog.V(3).Infoln("Pod app name: %v", appName)
+
+	if len(podDependencies) == 0 {
+		return framework.NewStatus(framework.Success, "")
+	}
+
+	if checkAllDependenciesBind(podDependencies, pl.bindMap) {
+		return framework.NewStatus(framework.Success, "")
+	}
+
+	return framework.NewStatus(framework.Unschedulable, "")
 }
 
 func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
@@ -103,12 +166,14 @@ func (pl *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod 
 	// if err != nil {
 	// 	return framework.NewStatus(framework.Error, err.Error())
 	// }
-	klog.V(3).Infof("PREBIND NODE : %v", pod.Name)
+
+	klog.V(3).Infof("PREBIND POD : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
-	klog.V(3).Infof("POSTBIND NODE : %v", pod.Name)
+	klog.V(3).Infof("POSTBIND POD : %v", pod.Name)
+	markPodBind(getPodAppName(pod), pl.bindMap)
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
@@ -118,7 +183,8 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 	}
 	klog.V(3).Infof("--------> args: %+v", args)
 	return &Sample{
-		args:   args,
-		handle: handle,
+		args:    args,
+		handle:  handle,
+		bindMap: make(map[string]bool),
 	}, nil
 }

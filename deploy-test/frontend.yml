@@ -15,7 +15,7 @@ spec:
         app: frontend
         tier: web
         topology: topology-test
-        depends-on: backend
+        depends-on: backend__backend
         scheduleTimeoutSeconds: "30"
     spec:
       schedulerName: scheduler-framework-sample
