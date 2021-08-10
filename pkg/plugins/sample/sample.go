@@ -2,6 +2,7 @@ package sample
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -39,8 +40,14 @@ func (pl *Sample) Name() string {
 	return Name
 }
 
-func getPodScheduleTimeoutLabel(pod *v1.Pod) string {
-	return pod.Labels["scheduleTimeoutSeconds"]
+func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
+	scheduleTimeoutSeconds := pod.Labels["scheduleTimeoutSeconds"]
+	timeoutSeconds, err := strconv.Atoi(scheduleTimeoutSeconds)
+	if err != nil {
+		return 30 // default scheduler timeout, todo export this
+	}
+
+	return timeoutSeconds
 }
 
 func getPodDependencies(pod *v1.Pod) []string {
