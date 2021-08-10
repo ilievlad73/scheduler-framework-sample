@@ -62,12 +62,12 @@ func (pl *Sample) ScoreExtensions() framework.ScoreExtensions {
 }
 
 func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
-	klog.V(3).Infof("RESERVE THE POD: %v", pod.Name)
+	klog.Infof("RESERVE THE POD: %v", pod.Name)
 	return nil
 }
 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
-	klog.V(3).Infof("PERMIT ALLOWS THE POD: %v", pod.Name)
+	klog.Infof("PERMIT ALLOWS THE POD: %v", pod.Name)
 	return framework.NewStatus(framework.Success, ""), 0
 }
 
