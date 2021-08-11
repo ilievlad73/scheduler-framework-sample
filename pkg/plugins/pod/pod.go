@@ -269,29 +269,31 @@ func MarkCompleteDependencyOnAsRunning(app string, pod *SamplePod) {
 	dependency.isRunning = true
 }
 
-func MarkPodAsCompleted(app string, samplePods map[string]*SamplePod) {
-	pod := samplePods[app]
-	podTopology := pod.topology
+func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
+	appName := AppName(pod)
+	samplePod := samplePods[AppName(pod)]
+	podTopology := samplePod.topology
 	/* mark on yourself */
-	pod.isRunning = true
+	samplePod.isRunning = true
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
-			MarkCompleteDependencyOnAsCompleted(app, otherPod)
+			MarkCompleteDependencyOnAsCompleted(appName, otherPod)
 		}
 	}
 
 }
 
-func MarkPodAsRunnning(app string, samplePods map[string]*SamplePod) {
-	pod := samplePods[app]
-	podTopology := pod.topology
+func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
+	appName := AppName(pod)
+	samplePod := samplePods[AppName(pod)]
+	podTopology := samplePod.topology
 	/* mark on yourself */
-	pod.isRunning = true
+	samplePod.isRunning = true
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
-			MarkCompleteDependencyOnAsRunning(app, otherPod)
+			MarkCompleteDependencyOnAsRunning(appName, otherPod)
 		}
 	}
 

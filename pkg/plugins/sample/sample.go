@@ -56,7 +56,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	klog.V(3).Infof("Prefilter pod : %v, app : %v, dependencies %v", pod.Name, podUtils.AppName(pod), podUtils.CompleteDependsOnList(pod))
 
 	podUtils.InitSamplePod(podUtils.AppName(pod), podUtils.TopologyName(pod), podUtils.ScheduleTimeout(pod), podUtils.CompleteDependsOnList(pod), pl.samplePods)
-	klog.V(3).Infof("Sample pods", pl.samplePods)
+	klog.V(3).Infof("Sample pods from prefilter", pl.samplePods)
 
 	/* DECISION BASED ON OTHER PODS STATE */
 	OtherPods, err := podUtils.OtherPods(pl.clientset, pod)
@@ -115,6 +115,8 @@ func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
+	samplePods := podUtils.InitSamplePodsMap()
+
 	args := &Args{}
 	klog.V(3).Infof("--------> args: %+v", args)
 
@@ -128,8 +130,8 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 	}
 
 	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
-	controller := informerUtils.NewPodLoggingController(factory, handle, clientset)
-	samplePods := podUtils.InitSamplePodsMap()
+	controller := informerUtils.NewPodLoggingController(factory, handle, clientset, samplePods)
+
 	stop := make(chan struct{})
 	err = controller.Run(stop)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	// "time"
 
+	podUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/pod"
 	"k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -26,6 +27,7 @@ type PodLoggingController struct {
 	podInformer      coreinformers.PodInformer
 	frameworkHandler framework.FrameworkHandle
 	clientset        *kubernetes.Clientset
+	samplePods       map[string]*podUtils.SamplePod
 }
 
 // Run starts shared informers and waits for the shared informer cache to
@@ -53,6 +55,17 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 		"Informer, pod %s/%s updated to pod %s/%s : phase %s",
 		oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase,
 	)
+
+	if podUtils.IsRunning(newPod) {
+		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
+	}
+
+	if podUtils.IsCompleted(newPod) {
+		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
+	}
+
+	klog.V(3).Infof("Sample pods from update informe", c.samplePods)
+
 }
 
 func (c *PodLoggingController) podDelete(obj interface{}) {
@@ -61,7 +74,8 @@ func (c *PodLoggingController) podDelete(obj interface{}) {
 }
 
 // NewPodLoggingController creates a PodLoggingController
-func NewPodLoggingController(informerFactory informers.SharedInformerFactory, handle framework.FrameworkHandle, clientset *kubernetes.Clientset) *PodLoggingController {
+func NewPodLoggingController(informerFactory informers.SharedInformerFactory, handle framework.FrameworkHandle,
+	clientset *kubernetes.Clientset, samplePods map[string]*podUtils.SamplePod) *PodLoggingController {
 	podInformer := informerFactory.Core().V1().Pods()
 
 	c := &PodLoggingController{
@@ -69,6 +83,7 @@ func NewPodLoggingController(informerFactory informers.SharedInformerFactory, ha
 		podInformer:      podInformer,
 		frameworkHandler: handle,
 		clientset:        clientset,
+		samplePods:       samplePods,
 	}
 	podInformer.Informer().AddEventHandler(
 		// Your custom resource event handlers.
