@@ -8,8 +8,6 @@ spec:
     metadata:
       labels:
         app: job
-        topology: topology-test
-        depends-on: backend__backend
     spec:
       schedulerName: scheduler-framework-sample
       containers:
