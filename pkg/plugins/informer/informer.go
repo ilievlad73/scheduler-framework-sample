@@ -11,18 +11,19 @@ import (
 
 	// "k8s.io/client-go/kubernetes"
 	// "k8s.io/component-base/logs"
-	klog "k8s.io/klog/v2"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
+	klog "k8s.io/klog/v2"
+	framework "k8s.io/kubernetes/pkg/scheduler/framework/v1alpha1"
 	// "k8s.io/client-go/tools/clientcmd"
 )
 
 // PodLoggingController logs the name and namespace of pods that are added,
 // deleted, or updated
 type PodLoggingController struct {
-	informerFactory informers.SharedInformerFactory
-	podInformer     coreinformers.PodInformer
+	informerFactory  informers.SharedInformerFactory
+	podInformer      coreinformers.PodInformer
+	frameworkHandler framework.FrameworkHandle
 }
 
 // Run starts shared informers and waits for the shared informer cache to
@@ -58,12 +59,13 @@ func (c *PodLoggingController) podDelete(obj interface{}) {
 }
 
 // NewPodLoggingController creates a PodLoggingController
-func NewPodLoggingController(informerFactory informers.SharedInformerFactory) *PodLoggingController {
+func NewPodLoggingController(informerFactory informers.SharedInformerFactory, handle framework.FrameworkHandle) *PodLoggingController {
 	podInformer := informerFactory.Core().V1().Pods()
 
 	c := &PodLoggingController{
-		informerFactory: informerFactory,
-		podInformer:     podInformer,
+		informerFactory:  informerFactory,
+		podInformer:      podInformer,
+		frameworkHandler: handle,
 	}
 	podInformer.Informer().AddEventHandler(
 		// Your custom resource event handlers.
