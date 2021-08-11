@@ -58,13 +58,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	podUtils.InitSamplePod(podUtils.AppName(pod), podUtils.TopologyName(pod), podUtils.ScheduleTimeout(pod), podUtils.CompleteDependsOnList(pod), pl.samplePods)
 	klog.V(3).Infof("Sample pods from prefilter", pl.samplePods)
 
-	/* DECISION BASED ON OTHER PODS STATE */
-	OtherPods, err := podUtils.OtherPods(pl.clientset, pod)
-	if err != nil {
-		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "")
-	}
-
-	if podUtils.AreCompleteDependsOnCompleted(OtherPods, pod) {
+	if podUtils.AreCompleteDependsOnRunningV2(pod, pl.samplePods) {
 		return framework.NewStatus(framework.Success, "")
 	}
 
