@@ -198,6 +198,8 @@ podAppName -> { appName,
 
 /* POD MANAGEMENT DATA STRUCTURE */
 
+/* TODO UPDATE THIS, switch to a single status value due to complicated conditions */
+
 type SamplePodState struct {
 	isPending    bool
 	isRunning    bool
@@ -260,6 +262,36 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePods[app] = samplePod
 }
 
+func MarkCompleteDependencyOnAsPending(app string, pod *SamplePod) {
+	dependency, ok := pod.completeDependsOn[app]
+	if ok == false {
+		return
+	}
+
+	dependency.isRunning = false
+	dependency.isCompleted = false
+	dependency.isPending = true
+	dependency.isTerminated = false
+}
+
+func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
+	appName := AppName(pod)
+	samplePod := samplePods[AppName(pod)]
+	podTopology := samplePod.topology
+
+	/* mark on yourself */
+	samplePod.isRunning = false
+	samplePod.isCompleted = false
+	samplePod.isPending = true
+	samplePod.isTerminated = false
+
+	for _, otherPod := range samplePods {
+		if otherPod.topology == podTopology {
+			MarkCompleteDependencyOnAsRunning(appName, otherPod)
+		}
+	}
+}
+
 func MarkCompleteDependencyOnAsRunning(app string, pod *SamplePod) {
 	dependency, ok := pod.completeDependsOn[app]
 	if ok == false {
@@ -278,17 +310,16 @@ func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 
 	/* mark on yourself */
-	samplePod.isRunning = true
 	samplePod.isCompleted = false
 	samplePod.isPending = false
 	samplePod.isTerminated = false
+	samplePod.isRunning = true
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
 			MarkCompleteDependencyOnAsRunning(appName, otherPod)
 		}
 	}
-
 }
 
 func MarkCompleteDependencyOnAsCompleted(app string, pod *SamplePod) {
@@ -325,8 +356,9 @@ func AreCompleteDependsOnCompletedV2(pod *v1.Pod, samplePods map[string]*SampleP
 	podSample := samplePods[appName]
 	completeDependsOn := podSample.completeDependsOn
 	klog.Infof("AreCompleteDependsOnCompletedV2 %v", completeDependsOn)
+	klog.Infof("AreCompleteDependsOnCompletedV2 pod deps list %v", CompleteDependsOnList(pod))
 	for _, dependencyPod := range completeDependsOn {
-		if dependencyPod.isCompleted == false {
+		if dependencyPod.isCompleted == false && (dependencyPod.isPending == true || dependencyPod.isRunning == true) {
 			return false
 		}
 	}
