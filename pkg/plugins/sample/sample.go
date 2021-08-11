@@ -54,6 +54,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 
 	/* REFACTOR */
 	podCompleteDependencies := podUtils.CompleteDependsOnList(pod)
+	klog.V(3).Infof("COMPLETE DEPENDECY LIST: %v", podCompleteDependencies)
 	if len(podCompleteDependencies) == 0 {
 		return framework.NewStatus(framework.Success, "")
 	}
