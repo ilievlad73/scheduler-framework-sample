@@ -53,7 +53,10 @@ func (pl *Sample) Name() string {
 // TODO: sort pods form queue based on priority, topology key, and creation time
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
-	klog.V(3).Infof("Prefilter pod : %v, app : %v", pod.Name, podUtils.AppName(pod))
+	klog.V(3).Infof("Prefilter pod : %v, app : %v, dependencies %v", pod.Name, podUtils.AppName(pod), podUtils.CompleteDependsOnList(pod))
+
+	podUtils.InitSamplePod(podUtils.AppName(pod), podUtils.TopologyName(pod), podUtils.ScheduleTimeout(pod), podUtils.CompleteDependsOnList(pod), pl.samplePods)
+	klog.V(3).Infof("Sample pods", pl.samplePods)
 
 	/* DECISION BASED ON OTHER PODS STATE */
 	OtherPods, err := podUtils.OtherPods(pl.clientset, pod)
