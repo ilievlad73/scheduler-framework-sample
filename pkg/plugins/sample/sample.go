@@ -137,21 +137,19 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	appName := getPodAppName(pod)
 
 	/* log important labels */
-	klog.V(3).Infoln("Schedule timeout seconds %v", scheduleTimeout)
-	klog.V(3).Infoln("Pod dependencies %v", podDependencies)
-	klog.V(3).Infoln("Pod dependencies len %v", len(podDependencies))
-	klog.V(3).Infoln("Pod topolofy: %v", topology)
-	klog.V(3).Infoln("Pod app name: %v", appName)
+	klog.V(3).Infof("Schedule timeout seconds %v", scheduleTimeout)
+	klog.V(3).Infof("Pod dependencies %v", podDependencies)
+	klog.V(3).Infof("Pod dependencies len %v", len(podDependencies))
+	klog.V(3).Infof("Pod topolofy: %v", topology)
+	klog.V(3).Infof("Pod app name: %v", appName)
 
 	podsInfo, err := pl.clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
 	if err != nil {
 		return framework.NewStatus(framework.Success, "")
 	}
 
-	// klog.V(3).Infoln("Pods info %v", podsInfo.Items)
-
 	for _, pod := range podsInfo.Items {
-		klog.V(3).Infoln("Range: Pod name: %v, status: %v", pod.Name, pod.Status)
+		klog.V(3).Infof("Range: Pod name: %v, phase %v", pod.Name, pod.Status.Phase)
 	}
 
 	if len(podDependencies) == 0 {
@@ -208,28 +206,34 @@ func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1
 	markPodBind(getPodAppName(pod), pl.bindMap)
 }
 
-func Connect() (*kubernetes.Clientset, *rest.Config) {
+func Connect() (*kubernetes.Clientset, *rest.Config, error) {
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		panic(err.Error())
+		return nil, nil, err
 	}
+
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		return nil, nil, err
 	}
-	return clientset, config
+
+	return clientset, config, nil
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
 	args := &Args{}
+	klog.V(3).Infof("--------> args: %+v", args)
+
 	if err := framework.DecodeInto(plArgs, args); err != nil {
 		return nil, err
 	}
-	klog.V(3).Infof("--------> args: %+v", args)
 
-	clientset, clientsetConfig := Connect()
+	clientset, clientsetConfig, err := Connect()
+	if err != nil {
+		return nil, err
+	}
 
 	return &Sample{
 		args:            args,
