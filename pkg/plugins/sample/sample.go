@@ -52,11 +52,11 @@ func (pl *Sample) Name() string {
 // TODO: sort pods form queue based on priority, topology key, and creation time
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
-	klog.V(3).Infof("PREFILTER POD : %v, APP : %v", pod.Name, podUtils.AppName(pod))
+	klog.V(3).Infof("Prefilter pod : %v, app : %v", pod.Name, podUtils.AppName(pod))
 
 	/* REFACTOR */
 	podCompleteDependencies := podUtils.CompleteDependsOnList(pod)
-	klog.V(3).Infof("COMPLETE DEPENDECY LIST: %v", podCompleteDependencies)
+	klog.V(3).Infof("Complete dependecy list: %v", podCompleteDependencies)
 	if len(podCompleteDependencies) == 0 {
 		return framework.NewStatus(framework.Success, "")
 	}
@@ -79,12 +79,12 @@ func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
 }
 
 func (s *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
-	klog.V(3).Infof("FILTER POD : %v", pod.Name)
+	klog.V(3).Infof("Filter pod : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
-	klog.V(3).Infof("SCORING POD : %v", pod.Name)
+	klog.V(3).Infof("Scoring pod : %v", pod.Name)
 	return 0, framework.NewStatus(framework.Success, "")
 }
 
@@ -93,12 +93,12 @@ func (pl *Sample) ScoreExtensions() framework.ScoreExtensions {
 }
 
 func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) *framework.Status {
-	klog.V(3).Infof("RESERVE THE POD: %v", pod.Name)
+	klog.V(3).Infof("Reserve the pod: %v", pod.Name)
 	return nil
 }
 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
-	klog.V(3).Infof("PERMIT ALLOWS THE POD: %v", pod.Name)
+	klog.V(3).Infof("Permit allows the pod: %v to be scheduled on the node", pod.Name, nodeName)
 	return framework.NewStatus(framework.Success, ""), 0
 }
 
@@ -108,12 +108,12 @@ func (pl *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod 
 	// 	return framework.NewStatus(framework.Error, err.Error())
 	// }
 
-	klog.V(3).Infof("PREBIND POD : %v", pod.Name)
+	klog.V(3).Infof("Prebind pod : %v", pod.Name)
 	return framework.NewStatus(framework.Success, "")
 }
 
 func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
-	klog.V(3).Infof("POSTBIND POD : %v", pod.Name)
+	klog.V(3).Infof("Postbind pod : %v", pod.Name)
 	podUtils.MarkAsBind(podUtils.AppName(pod), pl.bindMap)
 }
 
