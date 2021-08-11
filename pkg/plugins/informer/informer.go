@@ -50,7 +50,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	oldPod := old.(*v1.Pod)
 	newPod := new.(*v1.Pod)
 	klog.Infof(
-		"Informer, pod %s/%s updated to pod %s/%s : phase%s",
+		"Informer, pod %s/%s updated to pod %s/%s : phase %s",
 		oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase,
 	)
 }
