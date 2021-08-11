@@ -8,6 +8,7 @@ import (
 
 	"k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
+	"k8s.io/client-go/kubernetes"
 
 	// "k8s.io/client-go/kubernetes"
 	// "k8s.io/component-base/logs"
@@ -24,6 +25,7 @@ type PodLoggingController struct {
 	informerFactory  informers.SharedInformerFactory
 	podInformer      coreinformers.PodInformer
 	frameworkHandler framework.FrameworkHandle
+	clientset        *kubernetes.Clientset
 }
 
 // Run starts shared informers and waits for the shared informer cache to
@@ -59,13 +61,14 @@ func (c *PodLoggingController) podDelete(obj interface{}) {
 }
 
 // NewPodLoggingController creates a PodLoggingController
-func NewPodLoggingController(informerFactory informers.SharedInformerFactory, handle framework.FrameworkHandle) *PodLoggingController {
+func NewPodLoggingController(informerFactory informers.SharedInformerFactory, handle framework.FrameworkHandle, clientset *kubernetes.Clientset) *PodLoggingController {
 	podInformer := informerFactory.Core().V1().Pods()
 
 	c := &PodLoggingController{
 		informerFactory:  informerFactory,
 		podInformer:      podInformer,
 		frameworkHandler: handle,
+		clientset:        clientset,
 	}
 	podInformer.Informer().AddEventHandler(
 		// Your custom resource event handlers.
