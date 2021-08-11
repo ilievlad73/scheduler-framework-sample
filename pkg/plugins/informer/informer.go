@@ -1,20 +1,21 @@
 package informer
 
 import (
-	"flag"
+	// "flag"
+
 	"fmt"
-	"time"
+	// "time"
 
 	"k8s.io/client-go/informers"
 	coreinformers "k8s.io/client-go/informers/core/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/component-base/logs"
+
+	// "k8s.io/client-go/kubernetes"
+	// "k8s.io/component-base/logs"
 	klog "k8s.io/klog/v2"
 
-	//"k8s.io/client-go/pkg/api/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/clientcmd"
+	// "k8s.io/client-go/tools/clientcmd"
 )
 
 // PodLoggingController logs the name and namespace of pods that are added,
@@ -78,34 +79,34 @@ func NewPodLoggingController(informerFactory informers.SharedInformerFactory) *P
 	return c
 }
 
-var kubeconfig string
+// var kubeconfig string
 
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "absolute path to the kubeconfig file")
-}
+// func init() {
+// 	flag.StringVar(&kubeconfig, "kubeconfig", "", "absolute path to the kubeconfig file")
+// }
 
-func main() {
-	flag.Parse()
-	logs.InitLogs()
-	defer logs.FlushLogs()
+// func main() {
+// 	flag.Parse()
+// 	logs.InitLogs()
+// 	defer logs.FlushLogs()
 
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		panic(err.Error())
-	}
+// 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		klog.Fatal(err)
-	}
+// 	clientset, err := kubernetes.NewForConfig(config)
+// 	if err != nil {
+// 		klog.Fatal(err)
+// 	}
 
-	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
-	controller := NewPodLoggingController(factory)
-	stop := make(chan struct{})
-	defer close(stop)
-	err = controller.Run(stop)
-	if err != nil {
-		klog.Fatal(err)
-	}
-	select {}
-}
+// 	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
+// 	controller := NewPodLoggingController(factory)
+// 	stop := make(chan struct{})
+// 	defer close(stop)
+// 	err = controller.Run(stop)
+// 	if err != nil {
+// 		klog.Fatal(err)
+// 	}
+// 	select {}
+// }
