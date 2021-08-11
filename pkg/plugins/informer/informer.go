@@ -57,10 +57,12 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	)
 
 	if podUtils.IsRunning(newPod) {
+		klog.V(3).Infof("mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
 	}
 
 	if podUtils.IsCompleted(newPod) {
+		klog.V(3).Infof("mark pod as completed")
 		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
 	}
 
