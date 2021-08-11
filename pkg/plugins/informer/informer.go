@@ -41,21 +41,21 @@ func (c *PodLoggingController) Run(stopCh chan struct{}) error {
 
 func (c *PodLoggingController) podAdd(obj interface{}) {
 	pod := obj.(*v1.Pod)
-	klog.Infof("INFORMER, POD CREATED: %s/%s", pod.Namespace, pod.Name)
+	klog.Infof("Informer, pod created: %s/%s", pod.Namespace, pod.Name)
 }
 
 func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	oldPod := old.(*v1.Pod)
 	newPod := new.(*v1.Pod)
 	klog.Infof(
-		"INFORMER, POD UPDATED. %s/%s %s",
+		"Informer, pod updated. %s/%s %s",
 		oldPod.Namespace, oldPod.Name, newPod.Status.Phase,
 	)
 }
 
 func (c *PodLoggingController) podDelete(obj interface{}) {
 	pod := obj.(*v1.Pod)
-	klog.Infof("INFOMER, POD DELETED: %s/%s", pod.Namespace, pod.Name)
+	klog.Infof("Infomer, pod deleted: %s/%s", pod.Namespace, pod.Name)
 }
 
 // NewPodLoggingController creates a PodLoggingController
