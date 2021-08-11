@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       labels:
-        app: job
+        app: job-1
         topology: jobs-tp
     spec:
       schedulerName: scheduler-framework-sample

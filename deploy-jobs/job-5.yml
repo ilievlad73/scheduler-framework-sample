@@ -7,9 +7,9 @@ spec:
   template:
     metadata:
       labels:
-        app: job
+        app: job-5
         topology: jobs-tp
-        complete-depends-on: job-4
+        complete-depends-on: job-3
     spec:
       schedulerName: scheduler-framework-sample
       containers:

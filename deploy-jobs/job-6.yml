@@ -9,7 +9,7 @@ spec:
       labels:
         app: job-6
         topology: jobs-tp
-        complete-depends-on: job-5__job-6
+        complete-depends-on: job-4__job-5
     spec:
       schedulerName: scheduler-framework-sample
       containers:
