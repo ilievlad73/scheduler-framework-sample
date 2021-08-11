@@ -2,11 +2,10 @@ package sample
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/client"
+	podUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/pod"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -47,83 +46,6 @@ func (pl *Sample) Name() string {
 	return Name
 }
 
-/* UTILS */
-func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
-	scheduleTimeoutSeconds := pod.Labels["scheduleTimeoutSeconds"]
-	timeoutSeconds, err := strconv.Atoi(scheduleTimeoutSeconds)
-	if err != nil {
-		return 30 // default scheduler timeout, todo export this
-	}
-
-	return timeoutSeconds
-}
-
-func getPodAppName(pod *v1.Pod) string {
-	return pod.Labels["app"]
-}
-
-func getPodTopology(pod *v1.Pod) string {
-	return pod.Labels["topology"]
-}
-
-func removeEmptyStrings(s []string) []string {
-	var r []string
-	for _, str := range s {
-		if str != "" {
-			r = append(r, str)
-		}
-	}
-	return r
-}
-
-func getPodDependencies(pod *v1.Pod) []string {
-	labelsString := pod.Labels["depends-on"]
-	return removeEmptyStrings(strings.Split(labelsString, "__"))
-}
-
-func displayPodMetadataName(pod *v1.Pod) {
-	for key, value := range pod.Labels {
-		fmt.Printf("Labels: key[%s] value[%s]\n", key, value)
-	}
-
-	for key, value := range pod.ObjectMeta.Labels {
-		fmt.Printf("Meta labels: key[%s] value[%s]\n", key, value)
-	}
-}
-
-func getPodDependencyOff(pod *v1.Pod) []string {
-	labelsString := pod.Labels["dependency-off"]
-	return removeEmptyStrings(strings.Split(labelsString, "__"))
-}
-
-func isPodBind(podName string, bindMap map[string]bool) bool {
-	isBind, ok := bindMap[podName]
-	if ok != true {
-		return false
-	}
-
-	return isBind
-}
-
-func markPodBind(podName string, bindMap map[string]bool) {
-	bindMap[podName] = true
-}
-
-func markPodUnBind(podName string, bindMap map[string]bool) {
-	delete(bindMap, podName)
-}
-
-func checkAllDependenciesBind(podNames []string, bindMap map[string]bool) bool {
-	for _, s := range podNames {
-		if isPodBind(s, bindMap) == false {
-
-			return false
-		}
-	}
-
-	return true
-}
-
 /* END UTILS */
 
 // TODO: sort pods form queue based on priority, topology key, and creation time
@@ -131,15 +53,15 @@ func checkAllDependenciesBind(podNames []string, bindMap map[string]bool) bool {
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
 	klog.V(3).Infof("PREFILTER POD : %v", pod.Name)
 
-	scheduleTimeout := getPodScheduleTimeoutLabel(pod)
-	podDependencies := getPodDependencies(pod)
-	topology := getPodTopology(pod)
-	appName := getPodAppName(pod)
+	scheduleTimeout := podUtils.ScheduleTimeout(pod)
+	podCompleteDependencies := podUtils.CompleteDependsOnList(pod)
+	topology := podUtils.TopologyName(pod)
+	appName := podUtils.AppName(pod)
 
 	/* log important labels */
 	klog.V(3).Infof("Schedule timeout seconds %v", scheduleTimeout)
-	klog.V(3).Infof("Pod dependencies %v", podDependencies)
-	klog.V(3).Infof("Pod dependencies len %v", len(podDependencies))
+	klog.V(3).Infof("Pod dependencies complete %v", podCompleteDependencies)
+	klog.V(3).Infof("Pod dependencies comeplete len %v", len(podCompleteDependencies))
 	klog.V(3).Infof("Pod topolofy: %v", topology)
 	klog.V(3).Infof("Pod app name: %v", appName)
 
@@ -152,11 +74,11 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 		klog.V(3).Infof("Range: Pod name: %v, phase %v", pod.Name, pod.Status.Phase)
 	}
 
-	if len(podDependencies) == 0 {
+	if len(podCompleteDependencies) == 0 {
 		return framework.NewStatus(framework.Success, "")
 	}
 
-	if checkAllDependenciesBind(podDependencies, pl.bindMap) {
+	if podUtils.CheckAllDependenciesBind(podCompleteDependencies, pl.bindMap) {
 		return framework.NewStatus(framework.Success, "")
 	}
 
@@ -203,23 +125,7 @@ func (pl *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod 
 
 func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
 	klog.V(3).Infof("POSTBIND POD : %v", pod.Name)
-	markPodBind(getPodAppName(pod), pl.bindMap)
-}
-
-func Connect() (*kubernetes.Clientset, *rest.Config, error) {
-	// creates the in-cluster config
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return clientset, config, nil
+	podUtils.MarkAsBind(podUtils.AppName(pod), pl.bindMap)
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
@@ -230,7 +136,7 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 		return nil, err
 	}
 
-	clientset, clientsetConfig, err := Connect()
+	clientset, clientsetConfig, err := client.Connect()
 	if err != nil {
 		return nil, err
 	}
