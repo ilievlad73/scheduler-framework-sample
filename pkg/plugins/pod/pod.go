@@ -205,6 +205,10 @@ type SamplePodState struct {
 	isTerminated bool
 }
 
+func (podState SamplePodState) String() string {
+	return fmt.Sprintf("{isPending:%v, isRunning:%v, isCompleted:%v, isTerminated: %v}", podState.isPending, podState.isRunning, podState.isCompleted, podState.isTerminated)
+}
+
 type SamplePod struct {
 	app                    string
 	topology               string
@@ -214,6 +218,11 @@ type SamplePod struct {
 	isCompleted            bool
 	isTerminated           bool
 	completeDependsOn      map[string]*SamplePodState
+}
+
+func (pod SamplePod) String() string {
+	return fmt.Sprintf("{app: %v, topology: %v,scheduleTimeoutSeconds:%v, isPending:%v, isRunning:%v, isCompleted:%v, isTerminated: %v, completeDependsOn: %v}",
+		pod.app, pod.topology, pod.scheduleTimeoutSeconds, pod.isPending, pod.isRunning, pod.isCompleted, pod.isTerminated, pod.completeDependsOn)
 }
 
 func InitSamplePodsMap() map[string]*SamplePod {
