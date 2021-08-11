@@ -2,6 +2,7 @@ package sample
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -53,7 +54,14 @@ func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
 }
 
 func getPodAppName(pod *v1.Pod) string {
-	return pod.Labels["app"]
+	value, ok := pod.Labels["app"]
+	if ok != false {
+		return value
+	}
+
+	klog.V(3).Infoln("Pod for a job workload\n")
+	value = pod.Labels["job-name"]
+	return value
 }
 
 func getPodTopology(pod *v1.Pod) string {
@@ -73,6 +81,16 @@ func removeEmptyStrings(s []string) []string {
 func getPodDependencies(pod *v1.Pod) []string {
 	labelsString := pod.Labels["depends-on"]
 	return removeEmptyStrings(strings.Split(labelsString, "__"))
+}
+
+func displayPodMetadataName(pod *v1.Pod) {
+	for key, value := range pod.Labels {
+		fmt.Printf("Labels: key[%s] value[%s]\n", key, value)
+	}
+
+	for key, value := range pod.ObjectMeta.Labels {
+		fmt.Printf("Meta labels: key[%s] value[%s]\n", key, value)
+	}
 }
 
 func getPodDependencyOff(pod *v1.Pod) []string {
@@ -126,6 +144,8 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	klog.V(3).Infoln("Pod dependencies len %v", len(podDependencies))
 	klog.V(3).Infoln("Pod topolofy: %v", topology)
 	klog.V(3).Infoln("Pod app name: %v", appName)
+
+	// displayPodMetadataName(pod)
 
 	if len(podDependencies) == 0 {
 		return framework.NewStatus(framework.Success, "")
