@@ -324,6 +324,7 @@ func AreCompleteDependsOnCompletedV2(pod *v1.Pod, samplePods map[string]*SampleP
 	appName := AppName(pod)
 	podSample := samplePods[appName]
 	completeDependsOn := podSample.completeDependsOn
+	klog.Infof("AreCompleteDependsOnCompletedV2 %v", completeDependsOn)
 	for _, dependencyPod := range completeDependsOn {
 		if dependencyPod.isCompleted == false {
 			return false
