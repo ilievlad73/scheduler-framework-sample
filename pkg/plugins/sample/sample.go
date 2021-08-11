@@ -58,7 +58,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	podUtils.InitSamplePod(podUtils.AppName(pod), podUtils.TopologyName(pod), podUtils.ScheduleTimeout(pod), podUtils.CompleteDependsOnList(pod), pl.samplePods)
 	klog.V(3).Infof("Sample pods from prefilter", pl.samplePods)
 
-	if podUtils.AreCompleteDependsOnRunningV2(pod, pl.samplePods) {
+	if podUtils.AreCompleteDependsOnCompletedV2(pod, pl.samplePods) {
 		return framework.NewStatus(framework.Success, "")
 	}
 
