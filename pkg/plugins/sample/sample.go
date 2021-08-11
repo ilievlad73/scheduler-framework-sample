@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/client"
+	informerUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/informer"
 	podUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/pod"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
@@ -124,6 +126,15 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 	}
 
 	clientset, clientsetConfig, err := client.Connect()
+	if err != nil {
+		return nil, err
+	}
+
+	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
+	controller := informerUtils.NewPodLoggingController(factory)
+	stop := make(chan struct{})
+	defer close(stop)
+	err = controller.Run(stop)
 	if err != nil {
 		return nil, err
 	}
