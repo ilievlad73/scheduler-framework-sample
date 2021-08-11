@@ -56,8 +56,6 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 		oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase,
 	)
 
-	klog.Infof("Sample pods from update informer before update", c.samplePods)
-
 	if podUtils.IsRunning(newPod) {
 		klog.Infof("mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
