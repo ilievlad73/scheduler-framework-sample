@@ -23,7 +23,7 @@ func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
 	/* remove current pod from the list */
 	filteredPods := []v1.Pod{}
 	for i := range podsInfo.Items {
-		if podsInfo.Items[i].GetName() == pod.GetName() {
+		if podsInfo.Items[i].GetName() != pod.GetName() {
 			filteredPods = append(filteredPods, podsInfo.Items[i])
 		}
 	}
