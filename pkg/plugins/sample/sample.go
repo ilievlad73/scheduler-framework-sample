@@ -8,7 +8,10 @@ import (
 	"time"
 
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/klog"
 	framework "k8s.io/kubernetes/pkg/scheduler/framework/v1alpha1"
 	"k8s.io/kubernetes/pkg/scheduler/nodeinfo"
@@ -33,9 +36,11 @@ var _ framework.ReservePlugin = &Sample{}
 var _ framework.PostBindPlugin = &Sample{}
 
 type Sample struct {
-	args    *Args
-	handle  framework.FrameworkHandle
-	bindMap map[string]bool
+	args            *Args
+	handle          framework.FrameworkHandle
+	bindMap         map[string]bool
+	clientset       *kubernetes.Clientset
+	clientsetConfig *rest.Config
 }
 
 func (pl *Sample) Name() string {
@@ -145,7 +150,16 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	klog.V(3).Infoln("Pod topolofy: %v", topology)
 	klog.V(3).Infoln("Pod app name: %v", appName)
 
-	// displayPodMetadataName(pod)
+	podsInfo, err := pl.clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
+	if err != nil {
+		return framework.NewStatus(framework.Success, "")
+	}
+
+	// klog.V(3).Infoln("Pods info %v", podsInfo.Items)
+
+	for _, pod := range podsInfo.Items {
+		klog.V(3).Infoln("Range Pod name: %v", pod.GetName())
+	}
 
 	if len(podDependencies) == 0 {
 		return framework.NewStatus(framework.Success, "")
@@ -201,15 +215,34 @@ func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1
 	markPodBind(getPodAppName(pod), pl.bindMap)
 }
 
+func Connect() (*kubernetes.Clientset, *rest.Config) {
+	// creates the in-cluster config
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+	return clientset, config
+}
+
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
 	args := &Args{}
 	if err := framework.DecodeInto(plArgs, args); err != nil {
 		return nil, err
 	}
 	klog.V(3).Infof("--------> args: %+v", args)
+
+	clientset, clientsetConfig := Connect()
+
 	return &Sample{
-		args:    args,
-		handle:  handle,
-		bindMap: make(map[string]bool),
+		args:            args,
+		handle:          handle,
+		bindMap:         make(map[string]bool),
+		clientset:       clientset,
+		clientsetConfig: clientsetConfig,
 	}, nil
 }
