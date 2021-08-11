@@ -5,6 +5,11 @@ metadata:
 spec:
   ttlSecondsAfterFinished: 15
   template:
+    metadata:
+      labels:
+        app: job
+        topology: topology-test
+        depends-on: backend__backend
     spec:
       schedulerName: scheduler-framework-sample
       containers:
