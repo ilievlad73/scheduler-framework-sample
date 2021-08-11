@@ -57,16 +57,16 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	)
 
 	if podUtils.IsRunning(newPod) {
-		klog.Infof("mark pod as running")
+		klog.Infof("[Informer] mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
 	}
 
 	if podUtils.IsCompleted(newPod) {
-		klog.Infof("mark pod as completed")
+		klog.Infof("[Informer] mark pod as completed")
 		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
 	}
 
-	klog.Infof("Sample pods from update informer after update", c.samplePods)
+	klog.Infof("[Informer] Sample pods", c.samplePods)
 }
 
 func (c *PodLoggingController) podDelete(obj interface{}) {

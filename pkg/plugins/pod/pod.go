@@ -281,7 +281,7 @@ func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	samplePod := samplePods[AppName(pod)]
 	podTopology := samplePod.topology
 	/* mark on yourself */
-	samplePod.isRunning = true
+	samplePod.isCompleted = true
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
