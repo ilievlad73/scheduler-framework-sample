@@ -141,4 +141,15 @@ func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
 	return filteredPods, nil
 }
 
+func AreCompleteDependsOnDone(otherPods []v1.Pod, pod *v1.Pod) bool {
+	podCompleteDependsOn := CompleteDependsOnList(pod)
+	for _, otherPod := range otherPods {
+		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && !IsCompleted(&otherPod) {
+			return false
+		}
+	}
+
+	return true
+}
+
 /* PODS END UTILS */

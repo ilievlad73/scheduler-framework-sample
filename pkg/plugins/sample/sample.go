@@ -50,26 +50,21 @@ func (pl *Sample) Name() string {
 // TODO: sort pods form queue based on priority, topology key, and creation time
 
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
-	klog.V(3).Infof("PREFILTER POD : %v", pod.Name)
+	klog.V(3).Infof("PREFILTER POD : %v, APP : %v", pod.Name, podUtils.AppName(pod))
 
+	/* REFACTOR */
 	podCompleteDependencies := podUtils.CompleteDependsOnList(pod)
-	appName := podUtils.AppName(pod)
-
-	/* log important labels */
-	klog.V(3).Infof("Pod dependencies complete %v", podCompleteDependencies)
-	klog.V(3).Infof("Pod dependencies comeplete len %v", len(podCompleteDependencies))
-	klog.V(3).Infof("Pod app name: %v", appName)
-
-	_, err := podUtils.OtherPods(pl.clientset, pod)
-	if err != nil {
-		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "")
-	}
-
 	if len(podCompleteDependencies) == 0 {
 		return framework.NewStatus(framework.Success, "")
 	}
 
-	if podUtils.CheckAllDependenciesBind(podCompleteDependencies, pl.bindMap) {
+	/* DECISION BASED ON OTHER PODS STATE */
+	OtherPods, err := podUtils.OtherPods(pl.clientset, pod)
+	if err != nil {
+		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "")
+	}
+
+	if podUtils.AreCompleteDependsOnDone(OtherPods, pod) {
 		return framework.NewStatus(framework.Success, "")
 	}
 
