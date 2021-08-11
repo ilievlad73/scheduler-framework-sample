@@ -59,11 +59,20 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	if podUtils.IsRunning(newPod) {
 		klog.Infof("[Informer] mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
+
 	}
 
 	if podUtils.IsCompleted(newPod) {
 		klog.Infof("[Informer] mark pod as completed")
 		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
+
+		c.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
+			pod := waitingPod.GetPod()
+			if podUtils.AreCompleteDependsOnRunningV2(pod, c.samplePods) {
+				klog.Infof("[Informer] Allow pod %v to pass permit", pod.Name)
+				waitingPod.Allow(pod.Name)
+			}
+		})
 	}
 
 	klog.Infof("[Informer] Sample pods", c.samplePods)
