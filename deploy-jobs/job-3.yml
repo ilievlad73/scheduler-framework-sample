@@ -9,7 +9,7 @@ spec:
       labels:
         app: job-3
         topology: jobs-tp
-        scheduleTimeoutSeconds: 90
+        scheduleTimeoutSeconds: "90"
         complete-depends-on: job-1__job-2
     spec:
       schedulerName: scheduler-framework-sample
