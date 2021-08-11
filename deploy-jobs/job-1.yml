@@ -1,18 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pi
+  name: job-1
 spec:
   ttlSecondsAfterFinished: 15
   template:
     metadata:
       labels:
         app: job
+        topology: jobs-tp
     spec:
       schedulerName: scheduler-framework-sample
       containers:
-      - name: pi
+      - name: job-1
         image: perl
         command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(5000)"]
       restartPolicy: Never
-  backoffLimit: 4
+  backoffLimit: 3

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-2
+  labels:
+    app: api-2
+spec:
+  selector:
+    matchLabels:
+      app: api-2
+  template:
+    metadata:
+      labels:
+        app: api-2
+        topology: services-tp
+        dependendency-off: frontend
+        topology: topology-test
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-2
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
