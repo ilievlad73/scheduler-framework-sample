@@ -229,6 +229,13 @@ func InitSamplePodsMap() map[string]*SamplePod {
 	return make(map[string]*SamplePod)
 }
 
+func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState) {
+	for _, dependency := range dependencies {
+		podState := new(SamplePodState)
+		podStateMap[dependency] = podState
+	}
+}
+
 func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, completeDependsOn []string, samplePods map[string]*SamplePod) {
 	/* check if somebody else initialized this */
 	_, ok := samplePods[app]
@@ -242,14 +249,8 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.topology = topology
 	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
 	samplePod.completeDependsOn = make(map[string]*SamplePodState)
+	InitPodState(completeDependsOn, samplePod.completeDependsOn)
 	samplePods[app] = samplePod
-}
-
-func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState) {
-	for _, dependency := range dependencies {
-		podState := new(SamplePodState)
-		podStateMap[dependency] = podState
-	}
 }
 
 func MarkCompleteDependencyOnAsCompleted(app string, pod *SamplePod) {
@@ -294,4 +295,30 @@ func MarkPodAsRunnning(app string, samplePods map[string]*SamplePod) {
 		}
 	}
 
+}
+
+func AreCompleteDependsOnCompletedV2(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	completeDependsOn := podSample.completeDependsOn
+	for _, dependencyPod := range completeDependsOn {
+		if dependencyPod.isCompleted == false {
+			return false
+		}
+	}
+
+	return true
+}
+
+func AreCompleteDependsOnRunningV2(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	completeDependsOn := podSample.completeDependsOn
+	for _, dependencyPod := range completeDependsOn {
+		if dependencyPod.isRunning == false {
+			return false
+		}
+	}
+
+	return true
 }
