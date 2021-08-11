@@ -12,31 +12,6 @@ import (
 	"k8s.io/klog"
 )
 
-/* PODS UTILS */
-
-func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
-	podsInfo, err := clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	/* remove current pod from the list */
-	filteredPods := []v1.Pod{}
-	for i := range podsInfo.Items {
-		if podsInfo.Items[i].GetName() != pod.GetName() {
-			filteredPods = append(filteredPods, podsInfo.Items[i])
-		}
-	}
-
-	for _, pod := range filteredPods {
-		klog.V(3).Infof("Range: Pod name: %v, phase %v", pod.Name, pod.Status.Phase)
-	}
-
-	return filteredPods, nil
-}
-
-/* PODS END UTILS */
-
 /* LABELS UTILS */
 
 func ScheduleTimeout(pod *v1.Pod) int {
@@ -142,3 +117,28 @@ func displayPodMetadataName(pod *v1.Pod) {
 		fmt.Printf("Meta labels: key[%s] value[%s]\n", key, value)
 	}
 }
+
+/* PODS UTILS */
+
+func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
+	podsInfo, err := clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	/* remove current pod from the list */
+	filteredPods := []v1.Pod{}
+	for i := range podsInfo.Items {
+		if podsInfo.Items[i].GetName() != pod.GetName() {
+			filteredPods = append(filteredPods, podsInfo.Items[i])
+		}
+	}
+
+	for _, otherPod := range filteredPods {
+		klog.V(3).Infof("Range: Pod app: %v, Pod name: %v, phase %v", AppName(&otherPod), otherPod.Name, otherPod.Status.Phase)
+	}
+
+	return filteredPods, nil
+}
+
+/* PODS END UTILS */
