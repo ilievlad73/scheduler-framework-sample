@@ -7,7 +7,6 @@ import (
 	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/client"
 	podUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/pod"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -53,25 +52,17 @@ func (pl *Sample) Name() string {
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
 	klog.V(3).Infof("PREFILTER POD : %v", pod.Name)
 
-	scheduleTimeout := podUtils.ScheduleTimeout(pod)
 	podCompleteDependencies := podUtils.CompleteDependsOnList(pod)
-	topology := podUtils.TopologyName(pod)
 	appName := podUtils.AppName(pod)
 
 	/* log important labels */
-	klog.V(3).Infof("Schedule timeout seconds %v", scheduleTimeout)
 	klog.V(3).Infof("Pod dependencies complete %v", podCompleteDependencies)
 	klog.V(3).Infof("Pod dependencies comeplete len %v", len(podCompleteDependencies))
-	klog.V(3).Infof("Pod topolofy: %v", topology)
 	klog.V(3).Infof("Pod app name: %v", appName)
 
-	podsInfo, err := pl.clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
+	_, err := podUtils.OtherPods(pl.clientset, pod)
 	if err != nil {
-		return framework.NewStatus(framework.Success, "")
-	}
-
-	for _, pod := range podsInfo.Items {
-		klog.V(3).Infof("Range: Pod name: %v, phase %v", pod.Name, pod.Status.Phase)
+		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "")
 	}
 
 	if len(podCompleteDependencies) == 0 {

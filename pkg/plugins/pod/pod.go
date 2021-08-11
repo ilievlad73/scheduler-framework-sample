@@ -7,7 +7,35 @@ import (
 
 	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/helpers"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
 )
+
+/* PODS UTILS */
+
+func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
+	podsInfo, err := clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	/* remove current pod from the list */
+	filteredPods := []v1.Pod{}
+	for i := range podsInfo.Items {
+		if podsInfo.Items[i].GetName() == pod.GetName() {
+			filteredPods = append(filteredPods, podsInfo.Items[i])
+		}
+	}
+
+	for _, pod := range filteredPods {
+		klog.V(3).Infof("Range: Pod name: %v, phase %v", pod.Name, pod.Status.Phase)
+	}
+
+	return filteredPods, nil
+}
+
+/* PODS END UTILS */
 
 /* LABELS UTILS */
 
