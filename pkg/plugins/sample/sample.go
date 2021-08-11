@@ -41,6 +41,7 @@ type Sample struct {
 	bindMap         map[string]bool
 	clientset       *kubernetes.Clientset
 	clientsetConfig *rest.Config
+	samplePods      map[string]*podUtils.SamplePod
 }
 
 func (pl *Sample) Name() string {
@@ -132,6 +133,7 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 
 	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
 	controller := informerUtils.NewPodLoggingController(factory, handle, clientset)
+	samplePods := podUtils.InitSamplePodsMap()
 	stop := make(chan struct{})
 	err = controller.Run(stop)
 	if err != nil {
@@ -144,5 +146,6 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 		bindMap:         make(map[string]bool),
 		clientset:       clientset,
 		clientsetConfig: clientsetConfig,
+		samplePods:      samplePods,
 	}, nil
 }

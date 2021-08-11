@@ -180,3 +180,54 @@ func AreCompleteDependsOnRunning(otherPods []v1.Pod, pod *v1.Pod) bool {
 }
 
 /* PODS END UTILS */
+
+/**
+*
+*
+podAppName -> { appName,
+				scheduleTimeoutSeconds,
+				completeDependsOnStatus: podAppName -> {
+															isRunning: false,
+															isCompleted: false,
+															isPending: false
+														}
+
+				}
+
+*/
+
+/* POD MANAGEMENT DATA STRUCTURE */
+
+type SamplePodState struct {
+	isPending    bool
+	isRunning    bool
+	isCompleted  bool
+	isTerminated bool
+}
+
+type SamplePod struct {
+	app                     string
+	topology                string
+	scheduleTimeoutSeconds  int
+	completeDependsOnStatus map[string]*SamplePodState
+}
+
+func InitSamplePodsMap() map[string]*SamplePod {
+	return make(map[string]*SamplePod)
+}
+
+func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, completeDependsOn []string, samplePods map[string]*SamplePod) {
+	/* check if somebody else initialized this */
+	_, ok := samplePods[app]
+	if ok {
+		return
+	}
+
+	/* init */
+	samplePod := new(SamplePod)
+	samplePod.app = app
+	samplePod.topology = topology
+	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
+	samplePod.completeDependsOnStatus = make(map[string]*SamplePodState)
+	samplePods[app] = samplePod
+}
