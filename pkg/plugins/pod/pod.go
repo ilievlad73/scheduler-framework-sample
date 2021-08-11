@@ -243,8 +243,10 @@ func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState,
 
 func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, completeDependsOn []string, samplePods map[string]*SamplePod) {
 	/* check if somebody else initialized this */
-	_, ok := samplePods[app]
+	existingSamplePod, ok := samplePods[app]
 	if ok {
+		existingSamplePod.completeDependsOn = make(map[string]*SamplePodState)
+		InitPodState(completeDependsOn, existingSamplePod.completeDependsOn, samplePods)
 		return
 	}
 
