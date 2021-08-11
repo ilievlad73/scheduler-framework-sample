@@ -45,16 +45,18 @@ func (c *PodLoggingController) Run(stopCh chan struct{}) error {
 
 func (c *PodLoggingController) podAdd(obj interface{}) {
 	pod := obj.(*v1.Pod)
-	klog.Infof("Informer, pod created: %s/%s", pod.Namespace, pod.Name)
+	klog.Infof("[Informer] pod created: %s/%s", pod.Namespace, pod.Name)
 }
 
 func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	oldPod := old.(*v1.Pod)
 	newPod := new.(*v1.Pod)
 	klog.Infof(
-		"Informer, pod %s/%s updated to pod %s/%s : phase %s",
+		"[Informer] pod %s/%s updated to pod %s/%s : phase %s",
 		oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase,
 	)
+
+	klog.V(3).Infof("Sample pods from update informer before update", c.samplePods)
 
 	if podUtils.IsRunning(newPod) {
 		klog.V(3).Infof("mark pod as running")
@@ -66,13 +68,12 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
 	}
 
-	klog.V(3).Infof("Sample pods from update informe", c.samplePods)
-
+	klog.V(3).Infof("Sample pods from update informer after update", c.samplePods)
 }
 
 func (c *PodLoggingController) podDelete(obj interface{}) {
 	pod := obj.(*v1.Pod)
-	klog.Infof("Infomer, pod deleted: %s/%s", pod.Namespace, pod.Name)
+	klog.Infof("[Infomer] pod deleted: %s/%s", pod.Namespace, pod.Name)
 }
 
 // NewPodLoggingController creates a PodLoggingController
