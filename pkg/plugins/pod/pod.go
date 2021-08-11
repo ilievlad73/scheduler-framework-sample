@@ -141,7 +141,7 @@ func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
 	return filteredPods, nil
 }
 
-func AreCompleteDependsOnDone(otherPods []v1.Pod, pod *v1.Pod) bool {
+func AreCompleteDependsOnCompleted(otherPods []v1.Pod, pod *v1.Pod) bool {
 	podCompleteDependsOn := CompleteDependsOnList(pod)
 	if len(podCompleteDependsOn) == 0 {
 		return true
@@ -153,6 +153,25 @@ func AreCompleteDependsOnDone(otherPods []v1.Pod, pod *v1.Pod) bool {
 
 	for _, otherPod := range otherPods {
 		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsCompleted((&otherPod)) {
+			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
+		}
+	}
+
+	return len(podCompleteDependsOn) == 0
+}
+
+func AreCompleteDependsOnRunning(otherPods []v1.Pod, pod *v1.Pod) bool {
+	podCompleteDependsOn := CompleteDependsOnList(pod)
+	if len(podCompleteDependsOn) == 0 {
+		return true
+	}
+
+	if len(otherPods) == 0 {
+		return false
+	}
+
+	for _, otherPod := range otherPods {
+		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsRunning((&otherPod)) {
 			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
 		}
 	}

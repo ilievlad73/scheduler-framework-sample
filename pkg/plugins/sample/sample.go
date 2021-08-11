@@ -67,7 +67,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "")
 	}
 
-	if podUtils.AreCompleteDependsOnDone(OtherPods, pod) {
+	if podUtils.AreCompleteDependsOnCompleted(OtherPods, pod) {
 		return framework.NewStatus(framework.Success, "")
 	}
 
