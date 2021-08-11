@@ -229,9 +229,14 @@ func InitSamplePodsMap() map[string]*SamplePod {
 	return make(map[string]*SamplePod)
 }
 
-func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState) {
+func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState, samplePods map[string]*SamplePod) {
 	for _, dependency := range dependencies {
 		podState := new(SamplePodState)
+		dependencyGlobalValue := samplePods[dependency]
+		podState.isPending = dependencyGlobalValue.isPending
+		podState.isRunning = dependencyGlobalValue.isRunning
+		podState.isCompleted = dependencyGlobalValue.isCompleted
+		podState.isTerminated = dependencyGlobalValue.isTerminated
 		podStateMap[dependency] = podState
 	}
 }
@@ -249,7 +254,7 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.topology = topology
 	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
 	samplePod.completeDependsOn = make(map[string]*SamplePodState)
-	InitPodState(completeDependsOn, samplePod.completeDependsOn)
+	InitPodState(completeDependsOn, samplePod.completeDependsOn, samplePods)
 	samplePods[app] = samplePod
 }
 
