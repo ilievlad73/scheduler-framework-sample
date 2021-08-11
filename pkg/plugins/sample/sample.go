@@ -9,6 +9,7 @@ import (
 	podUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/pod"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -113,6 +114,15 @@ func (pl *Sample) PreBind(ctx context.Context, state *framework.CycleState, pod 
 func (pl *Sample) PostBind(ctx context.Context, _ *framework.CycleState, pod *v1.Pod, nodeName string) {
 	klog.V(3).Infof("Postbind pod : %v", pod.Name)
 	podUtils.MarkAsBind(podUtils.AppName(pod), pl.bindMap)
+}
+
+// rejectPod rejects pod in cache
+func (pl *Sample) rejectPod(uid types.UID) {
+	waitingPod := pl.handle.GetWaitingPod(uid)
+	if waitingPod == nil {
+		return
+	}
+	waitingPod.Reject(Name)
 }
 
 func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.Plugin, error) {
