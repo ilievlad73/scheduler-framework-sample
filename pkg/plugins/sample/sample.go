@@ -59,7 +59,7 @@ func getPodAppName(pod *v1.Pod) string {
 		return value
 	}
 
-	klog.V(3).Infoln("Pod for a job workload\n")
+	klog.V(3).Infoln("Pod for a job workload")
 	value = pod.Labels["job-name"]
 	return value
 }
