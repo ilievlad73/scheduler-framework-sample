@@ -206,10 +206,14 @@ type SamplePodState struct {
 }
 
 type SamplePod struct {
-	app                     string
-	topology                string
-	scheduleTimeoutSeconds  int
-	completeDependsOnStatus map[string]*SamplePodState
+	app                    string
+	topology               string
+	scheduleTimeoutSeconds int
+	isPending              bool
+	isRunning              bool
+	isCompleted            bool
+	isTerminated           bool
+	completeDependsOn      map[string]*SamplePodState
 }
 
 func InitSamplePodsMap() map[string]*SamplePod {
@@ -228,6 +232,57 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.app = app
 	samplePod.topology = topology
 	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
-	samplePod.completeDependsOnStatus = make(map[string]*SamplePodState)
+	samplePod.completeDependsOn = make(map[string]*SamplePodState)
 	samplePods[app] = samplePod
+}
+
+func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState) {
+	for _, dependency := range dependencies {
+		podState := new(SamplePodState)
+		podStateMap[dependency] = podState
+	}
+}
+
+func MarkCompleteDependencyOnAsCompleted(app string, pod *SamplePod) {
+	dependency, ok := pod.completeDependsOn[app]
+	if ok == false {
+		return
+	}
+	dependency.isCompleted = true
+}
+
+func MarkCompleteDependencyOnAsRunning(app string, pod *SamplePod) {
+	dependency, ok := pod.completeDependsOn[app]
+	if ok == false {
+		return
+	}
+	dependency.isRunning = true
+}
+
+func MarkPodAsCompleted(app string, samplePods map[string]*SamplePod) {
+	pod := samplePods[app]
+	podTopology := pod.topology
+	/* mark on yourself */
+	pod.isRunning = true
+
+	for _, otherPod := range samplePods {
+		if otherPod.topology == podTopology {
+			MarkCompleteDependencyOnAsCompleted(app, otherPod)
+		}
+	}
+
+}
+
+func MarkPodAsRunnning(app string, samplePods map[string]*SamplePod) {
+	pod := samplePods[app]
+	podTopology := pod.topology
+	/* mark on yourself */
+	pod.isRunning = true
+
+	for _, otherPod := range samplePods {
+		if otherPod.topology == podTopology {
+			MarkCompleteDependencyOnAsRunning(app, otherPod)
+		}
+	}
+
 }

@@ -55,13 +55,6 @@ func (pl *Sample) Name() string {
 func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, pod *v1.Pod) *framework.Status {
 	klog.V(3).Infof("Prefilter pod : %v, app : %v", pod.Name, podUtils.AppName(pod))
 
-	/* REFACTOR */
-	podCompleteDependencies := podUtils.CompleteDependsOnList(pod)
-	klog.V(3).Infof("Complete dependecy list: %v", podCompleteDependencies)
-	if len(podCompleteDependencies) == 0 {
-		return framework.NewStatus(framework.Success, "")
-	}
-
 	/* DECISION BASED ON OTHER PODS STATE */
 	OtherPods, err := podUtils.OtherPods(pl.clientset, pod)
 	if err != nil {
