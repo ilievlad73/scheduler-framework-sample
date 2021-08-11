@@ -133,7 +133,6 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
 	controller := informerUtils.NewPodLoggingController(factory)
 	stop := make(chan struct{})
-	defer close(stop)
 	err = controller.Run(stop)
 	if err != nil {
 		return nil, err
