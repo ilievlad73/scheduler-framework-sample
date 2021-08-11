@@ -59,14 +59,7 @@ func getPodScheduleTimeoutLabel(pod *v1.Pod) int {
 }
 
 func getPodAppName(pod *v1.Pod) string {
-	value, ok := pod.Labels["app"]
-	if ok != false {
-		return value
-	}
-
-	klog.V(3).Infoln("Pod for a job workload")
-	value = pod.Labels["job-name"]
-	return value
+	return pod.Labels["app"]
 }
 
 func getPodTopology(pod *v1.Pod) string {
@@ -158,7 +151,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	// klog.V(3).Infoln("Pods info %v", podsInfo.Items)
 
 	for _, pod := range podsInfo.Items {
-		klog.V(3).Infoln("Range Pod name: %v", pod.GetName())
+		klog.V(3).Infoln("Range: Pod name: %v, status: %v", pod.Name, pod.Status)
 	}
 
 	if len(podDependencies) == 0 {
