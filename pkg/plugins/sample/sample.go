@@ -59,6 +59,10 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 		podUtils.CompleteDependsOnList(pod), podUtils.RunningDependsOnList(pod), pl.samplePods)
 	klog.V(3).Infof("Sample pods from prefilter", pl.samplePods)
 
+	if podUtils.AreRunningDependsOnRunningOrPending(pod, pl.samplePods) {
+		return framework.NewStatus(framework.Success, "")
+	}
+
 	if podUtils.AreCompleteDependsOnRunningOrComplete(pod, pl.samplePods) {
 		return framework.NewStatus(framework.Success, "")
 	}
@@ -92,8 +96,13 @@ func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
 	klog.V(3).Infof("Permit the pod: %v", pod.Name)
 
+	if podUtils.AreRunningDependsOnRunning(pod, pl.samplePods) == false {
+		klog.Infof("Pod: %v is waiting to be scheduled to node due to running deps: %v", pod.Name, nodeName)
+		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.ScheduleTimeout(pod)) * time.Second
+	}
+
 	if podUtils.AreCompleteDependsOnCompleted(pod, pl.samplePods) == false {
-		klog.Infof("Pod: %v is waiting to be scheduled to node: %v", pod.Name, nodeName)
+		klog.Infof("Pod: %v is waiting to be scheduled to node due to complete deps: %v", pod.Name, nodeName)
 		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.ScheduleTimeout(pod)) * time.Second
 	}
 

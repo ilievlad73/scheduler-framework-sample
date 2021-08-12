@@ -441,12 +441,25 @@ func AreCompleteDependsOnRunningOrComplete(pod *v1.Pod, samplePods map[string]*S
 	return true
 }
 
-func AreRunningDependsOnRunningOrCompleteOrPending(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+func AreRunningDependsOnRunning(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 	appName := AppName(pod)
 	podSample := samplePods[appName]
 	runningDependsOn := podSample.runningDependsOn
 	for _, dependencyPod := range runningDependsOn {
-		if dependencyPod.status != RUNNING_STATUS && dependencyPod.status != COMPLETED_STATUS && dependencyPod.status != PENDING_STATUS {
+		if dependencyPod.status != RUNNING_STATUS {
+			return false
+		}
+	}
+
+	return true
+}
+
+func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	runningDependsOn := podSample.runningDependsOn
+	for _, dependencyPod := range runningDependsOn {
+		if dependencyPod.status != RUNNING_STATUS && dependencyPod.status != PENDING_STATUS {
 			return false
 		}
 	}
