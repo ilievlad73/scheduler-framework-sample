@@ -62,7 +62,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	/* check for error states, running phase and container not ready => error from container */
 	if podUtils.IsRunning(newPod) {
 		for _, condition := range newPod.Status.Conditions {
-			if condition.Type == "Ready" && condition.Status == "false" {
+			if condition.Type == "Ready" && condition.Status == "False" {
 				isError = true
 				break
 			}
@@ -108,6 +108,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 func (c *PodLoggingController) podDelete(obj interface{}) {
 	pod := obj.(*v1.Pod)
 	klog.Infof("[Infomer] pod deleted: %s/%s", pod.Namespace, pod.Name)
+	/* TODO, cleanup data structure */
 }
 
 // NewPodLoggingController creates a PodLoggingController
