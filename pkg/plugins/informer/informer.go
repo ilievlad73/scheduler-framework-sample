@@ -55,11 +55,21 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	oldPod := old.(*v1.Pod)
 	newPod := new.(*v1.Pod)
 	klog.Infof(
-		"[Informer] pod %s/%s updated to pod %s/%s : phase %s, reason %s",
-		oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase, &newPod.Status.Reason,
+		"[Informer] pod %s/%s updated to pod %s/%s : phase %s", oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase,
 	)
 
-	if podUtils.IsError(newPod) {
+	isError := false
+	/* check for error states, running phase and container not ready => error from container */
+	if podUtils.IsRunning(newPod) {
+		for _, condition := range newPod.Status.Conditions {
+			if condition.Type == "Ready" && condition.Status == "false" {
+				isError = true
+				break
+			}
+		}
+	}
+
+	if isError {
 		klog.Infof("[Informer] mark pod as error")
 		podUtils.MarkPodAsError(newPod, c.samplePods)
 	} else if podUtils.IsPending(newPod) {
