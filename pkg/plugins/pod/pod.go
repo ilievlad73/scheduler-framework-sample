@@ -218,9 +218,11 @@ func InitSamplePodsMap() map[string]*SamplePod {
 func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState, samplePods map[string]*SamplePod) {
 	for _, dependency := range dependencies {
 		podState := new(SamplePodState)
-		dependencyGlobalValue := samplePods[dependency]
-		podState.status = dependencyGlobalValue.status
+		dependencyGlobalValue, ok := samplePods[dependency]
 		podStateMap[dependency] = podState
+		if ok {
+			podState.status = dependencyGlobalValue.status
+		}
 	}
 }
 
