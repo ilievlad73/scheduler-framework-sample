@@ -1,3 +1,5 @@
+// https://github.com/feiskyer/kubernetes-handbook/blob/master/examples/client/informer/informer.go
+
 package informer
 
 import (
