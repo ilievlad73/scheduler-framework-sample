@@ -13,8 +13,8 @@ spec:
       labels:
         app: api-2
         topology: services-tp
-        dependendency-off: frontend
-        topology: topology-test
+        scheduleTimeoutSeconds: "30"
+        complete-depends-on: job-3
     spec:
       schedulerName: scheduler-framework-sample
       containers:

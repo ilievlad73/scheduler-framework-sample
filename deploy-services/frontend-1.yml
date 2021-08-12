@@ -14,8 +14,8 @@ spec:
       labels:
         app: frontend-1
         topology: services-tp
-        depends-on: backend__backend
         scheduleTimeoutSeconds: "30"
+        running-depends-on: api-3
     spec:
       schedulerName: scheduler-framework-sample
       containers:

@@ -14,10 +14,9 @@ spec:
     metadata:
       labels:
         app: frontend-2
-        tier: web
         topology: services-tp
-        depends-on: backend__backend
         scheduleTimeoutSeconds: "30"
+        running-depends-on: api-3
     spec:
       schedulerName: scheduler-framework-sample
       containers:
