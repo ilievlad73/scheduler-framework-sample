@@ -356,4 +356,17 @@ func AreCompleteDependsOnRunningV2(pod *v1.Pod, samplePods map[string]*SamplePod
 	return true
 }
 
+func AreCompleteDependsOnRunningOrCompleteV2(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	completeDependsOn := podSample.completeDependsOn
+	for _, dependencyPod := range completeDependsOn {
+		if dependencyPod.status != RUNNING_STATUS && dependencyPod.status != COMPLETED_STATUS {
+			return false
+		}
+	}
+
+	return true
+}
+
 /* END POD MANAGEMENT DATA STRUCTURE */
