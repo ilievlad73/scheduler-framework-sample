@@ -68,6 +68,10 @@ func IsRunning(pod *v1.Pod) bool {
 	return StatusPhase(pod) == RUNNING_STATUS
 }
 
+func IsError(pod *v1.Pod) bool {
+	return StatusPhase(pod) == ERROR_STATUS
+}
+
 func IsTerminating(pod *v1.Pod) bool {
 	return StatusPhase(pod) == TERMINATED_STATUS
 }
@@ -240,6 +244,37 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.completeDependsOn = make(map[string]*SamplePodState)
 	InitDependenciesPodState(completeDependsOn, samplePod.completeDependsOn, samplePods)
 	samplePods[app] = samplePod
+}
+
+func MarkDependencyOnAsError(app string, pod *SamplePod) {
+	runningDeppency, ok := pod.runningDependsOn[app]
+	if ok != false {
+		runningDeppency.status = UNDEFINED_STATUS
+	}
+
+	completeDependency, ok := pod.completeDependsOn[app]
+	if ok != false {
+		completeDependency.status = UNDEFINED_STATUS
+	}
+}
+
+func MarkPodAsError(pod *v1.Pod, samplePods map[string]*SamplePod) {
+	appName := AppName(pod)
+	samplePod, ok := samplePods[AppName(pod)]
+	if ok == false {
+		klog.Infof("Mark pod as pending failed, pod %v not exists in data structure", pod.Name)
+		return
+	}
+
+	podTopology := samplePod.topology
+	/* mark on yourself */
+	samplePod.status = UNDEFINED_STATUS
+
+	for _, otherPod := range samplePods {
+		if otherPod.topology == podTopology {
+			MarkDependencyOnAsError(appName, otherPod)
+		}
+	}
 }
 
 func MarkDependencyOnAsUndefined(app string, pod *SamplePod) {

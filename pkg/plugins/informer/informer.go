@@ -59,7 +59,10 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 		oldPod.Namespace, oldPod.Name, newPod.Namespace, newPod.Name, newPod.Status.Phase,
 	)
 
-	if podUtils.IsPending(newPod) {
+	if podUtils.IsError(newPod) {
+		klog.Infof("[Informer] mark pod as error")
+		podUtils.MarkPodAsError(newPod, c.samplePods)
+	} else if podUtils.IsPending(newPod) {
 		klog.Infof("[Informer] mark pod as pending")
 		podUtils.MarkPodAsPending(newPod, c.samplePods)
 	} else if podUtils.IsRunning(newPod) {
