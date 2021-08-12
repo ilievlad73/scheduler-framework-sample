@@ -225,6 +225,10 @@ func InitDependenciesPodState(dependencies []string, podStateMap map[string]*Sam
 	}
 }
 
+func RemoveSamplePod(app string, samplePods map[string]*SamplePod) {
+	delete(samplePods, app)
+}
+
 func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, completeDependsOn []string, runningDependsOn []string, samplePods map[string]*SamplePod) {
 	/* check if somebody else initialized this */
 	existingSamplePod, ok := samplePods[app]
