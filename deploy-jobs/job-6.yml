@@ -16,6 +16,6 @@ spec:
       containers:
       - name: job-6
         image: bash
-        command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+        command: ["bash", "-c", "echo Started: $(date) && sleep 60 && echo Ended: $(date)"]
       restartPolicy: Never
   backoffLimit: 3

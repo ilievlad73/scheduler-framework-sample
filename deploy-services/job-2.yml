@@ -12,8 +12,8 @@ spec:
     spec:
       schedulerName: scheduler-framework-sample
       containers:
-      - name: pi-2
-        image: perl
-        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(5000)"]
+      - name: job-2
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 60 && echo Ended: $(date)"]
       restartPolicy: Never
   backoffLimit: 3
