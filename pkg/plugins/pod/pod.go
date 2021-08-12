@@ -17,6 +17,7 @@ const (
 	RUNNING_STATUS    = "Running"
 	COMPLETED_STATUS  = "Succeeded"
 	TERMINATED_STATUS = "Terminating"
+	UNDEFINED_STATUS  = ""
 )
 
 func ScheduleTimeout(pod *v1.Pod) int {
@@ -237,6 +238,37 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.completeDependsOn = make(map[string]*SamplePodState)
 	InitDependenciesPodState(completeDependsOn, samplePod.completeDependsOn, samplePods)
 	samplePods[app] = samplePod
+}
+
+func MarkDependencyOnAsUndefined(app string, pod *SamplePod) {
+	runningDeppency, ok := pod.runningDependsOn[app]
+	if ok != false {
+		runningDeppency.status = UNDEFINED_STATUS
+	}
+
+	completeDependency, ok := pod.completeDependsOn[app]
+	if ok != false {
+		completeDependency.status = UNDEFINED_STATUS
+	}
+}
+
+func MarkPodAsUndefined(pod *v1.Pod, samplePods map[string]*SamplePod) {
+	appName := AppName(pod)
+	samplePod, ok := samplePods[AppName(pod)]
+	if ok == false {
+		klog.Infof("Mark pod as pending failed, pod %v not exists in data structure", pod.Name)
+		return
+	}
+
+	podTopology := samplePod.topology
+	/* mark on yourself */
+	samplePod.status = UNDEFINED_STATUS
+
+	for _, otherPod := range samplePods {
+		if otherPod.topology == podTopology {
+			MarkDependencyOnAsUndefined(appName, otherPod)
+		}
+	}
 }
 
 func MarkDependencyOnAsPending(app string, pod *SamplePod) {

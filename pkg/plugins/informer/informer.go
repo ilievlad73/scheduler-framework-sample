@@ -62,14 +62,10 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	if podUtils.IsPending(newPod) {
 		klog.Infof("[Informer] mark pod as pending")
 		podUtils.MarkPodAsPending(newPod, c.samplePods)
-	}
-
-	if podUtils.IsRunning(newPod) {
+	} else if podUtils.IsRunning(newPod) {
 		klog.Infof("[Informer] mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
-	}
-
-	if podUtils.IsCompleted(newPod) {
+	} else if podUtils.IsCompleted(newPod) {
 		klog.Infof("[Informer] mark pod as completed")
 		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
 
@@ -80,6 +76,9 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 				waitingPod.Allow(c.sampleName)
 			}
 		})
+	} else {
+		klog.Infof("[Informer] mark pod as undefined")
+		podUtils.MarkPodAsUndefined(newPod, c.samplePods)
 	}
 
 	klog.Infof("[Informer] Sample pods", c.samplePods)
