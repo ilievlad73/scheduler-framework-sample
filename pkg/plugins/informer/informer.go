@@ -51,6 +51,7 @@ func (c *PodLoggingController) Run(stopCh chan struct{}) error {
 func (c *PodLoggingController) podAdd(obj interface{}) {
 	pod := obj.(*v1.Pod)
 	klog.Infof("[Informer] pod created: %s/%s", pod.Namespace, pod.Name)
+	klog.Infof("[Informer] Add sample pods", c.samplePods)
 }
 
 func (c *PodLoggingController) podUpdate(old, new interface{}) {
@@ -64,7 +65,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	/* check for error states, running phase and container not ready => error from container */
 	if podUtils.IsRunning(newPod) {
 		for _, condition := range newPod.Status.Conditions {
-			// klog.Infof("Condition from error check %v", condition)
+			klog.Infof("Condition from error check %v", condition)
 			if condition.Type == "Ready" && condition.Status == "False" {
 				isError = true
 				break
@@ -93,7 +94,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 		podUtils.MarkPodAsUndefined(newPod, c.samplePods)
 	}
 
-	klog.Infof("[Informer] Sample pods", c.samplePods)
+	klog.Infof("[Informer] Update sample pods", c.samplePods)
 }
 
 func (c *PodLoggingController) podDelete(obj interface{}) {
@@ -101,6 +102,7 @@ func (c *PodLoggingController) podDelete(obj interface{}) {
 	klog.Infof("[Infomer] pod deleted: %s/%s", pod.Namespace, pod.Name)
 	klog.Infof("[Infomer] remove key: %s", podUtils.AppName(pod))
 	podUtils.RemoveSamplePod(podUtils.AppName(pod), c.samplePods)
+	klog.Infof("[Informer] Delete sample pods", c.samplePods)
 }
 
 // NewPodLoggingController creates a PodLoggingController
