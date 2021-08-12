@@ -20,7 +20,8 @@ import (
 
 const (
 	// Name is plugin name
-	Name = "sample"
+	Name                    = "sample"
+	schedulerTimeoutSeconds = 30
 )
 
 type Args struct {
@@ -101,8 +102,12 @@ func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
 	klog.V(3).Infof("Permit the pod: %v", pod.Name)
 
-	if !podUtils.AreRunningDependsOnRunning(pod, pl.samplePods) {
-		klog.Infof("Pod: %v is waiting to be scheduled to node due to running deps: %v", pod.Name, nodeName)
+	if !podUtils.AreRunningDependsOnRunningSince(pod, pl.samplePods, podUtils.POD_RUNNING_HEALTY_TIMEOUT) {
+		time.AfterFunc(podUtils.POD_RUNNING_HEALTY_TIMEOUT*time.Second, func() {
+			podUtils.AllowWaitingPods(Name, pl.handle, pl.samplePods)
+		})
+
+		klog.Infof("Pod: %v is waiting to be scheduled to node due to running deps since: %v", pod.Name, nodeName)
 		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.ScheduleTimeout(pod)) * time.Second
 	}
 

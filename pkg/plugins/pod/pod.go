@@ -8,6 +8,7 @@ import (
 	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/helpers"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog"
+	framework "k8s.io/kubernetes/pkg/scheduler/framework/v1alpha1"
 )
 
 /* LABELS UTILS */
@@ -20,6 +21,8 @@ const (
 	ERROR_STATUS              = "Error"
 	CONTAINER_CREATING_STATUS = "ContainerCreating"
 	UNDEFINED_STATUS          = ""
+
+	POD_RUNNING_HEALTY_TIMEOUT = 20 * 1000
 )
 
 func ScheduleTimeout(pod *v1.Pod) int {
@@ -533,3 +536,18 @@ func ShouldSkipScheduler(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 }
 
 /* END POD MANAGEMENT DATA STRUCTURE */
+
+/* PERMIT UTILS */
+/* TODO, reject waiting post on running if error */
+func AllowWaitingPods(sampleName string, handle framework.FrameworkHandle, samplePods map[string]*SamplePod) {
+	handle.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
+		pod := waitingPod.GetPod()
+		if AreRunningDependsOnRunningSince(pod, samplePods, POD_RUNNING_HEALTY_TIMEOUT) {
+			klog.Infof("[Informer] Pod %v passed running deps since check", pod.Name)
+			if AreCompleteDependsOnCompleted(pod, samplePods) {
+				klog.Infof("[Informer] Pod %v to passed complete deps check", pod.Name)
+				waitingPod.Allow(sampleName)
+			}
+		}
+	})
+}

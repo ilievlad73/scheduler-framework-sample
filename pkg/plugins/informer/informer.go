@@ -6,6 +6,8 @@ import (
 	// "flag"
 
 	"fmt"
+	"time"
+
 	// "time"
 
 	podUtils "github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/pod"
@@ -79,25 +81,13 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	} else if podUtils.IsRunning(newPod) {
 		klog.Infof("[Informer] mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
-
-		c.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
-			pod := waitingPod.GetPod()
-			if podUtils.AreRunningDependsOnRunning(pod, c.samplePods) {
-				klog.Infof("[Informer] Allow pod %v to pass permit due to running", pod.Name)
-				waitingPod.Allow(c.sampleName)
-			}
+		time.AfterFunc(podUtils.POD_RUNNING_HEALTY_TIMEOUT*time.Second, func() {
+			podUtils.AllowWaitingPods(c.sampleName, c.frameworkHandler, c.samplePods)
 		})
 	} else if podUtils.IsCompleted(newPod) {
 		klog.Infof("[Informer] mark pod as completed")
 		podUtils.MarkPodAsCompleted(newPod, c.samplePods)
-
-		c.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
-			pod := waitingPod.GetPod()
-			if podUtils.AreCompleteDependsOnCompleted(pod, c.samplePods) {
-				klog.Infof("[Informer] Allow pod %v to pass permit due to complete", pod.Name)
-				waitingPod.Allow(c.sampleName)
-			}
-		})
+		podUtils.AllowWaitingPods(c.sampleName, c.frameworkHandler, c.samplePods)
 	} else {
 		klog.Infof("[Informer] mark pod as undefined")
 		podUtils.MarkPodAsUndefined(newPod, c.samplePods)
