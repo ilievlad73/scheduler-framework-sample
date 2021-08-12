@@ -1,0 +1,127 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-1
+spec:
+  ttlSecondsAfterFinished: 15
+  template:
+    metadata:
+      labels:
+        app: job-1
+        topology: jobs-tp
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+      - name: job-1
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 30 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: job-2
+spec:
+    ttlSecondsAfterFinished: 15
+    template:
+    metadata:
+        labels:
+        app: job-2
+        topology: jobs-tp
+    spec:
+        schedulerName: scheduler-framework-sample
+        containers:
+        - name: job-2
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 45 && echo Ended: $(date)"]
+        restartPolicy: Never
+    backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-3
+spec:
+  ttlSecondsAfterFinished: 15
+  template:
+    metadata:
+      labels:
+        app: job-3
+        topology: jobs-tp
+        scheduleTimeoutSeconds: "30"
+        complete-depends-on: job-1__job-2
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+      - name: job-3
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 15 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-4
+spec:
+  ttlSecondsAfterFinished: 15
+  template:
+    metadata:
+      labels:
+        app: job-4
+        topology: jobs-tp
+        scheduleTimeoutSeconds: "30"
+        complete-depends-on: job-3
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+      - name: job-4
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 30 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: job-5
+spec:
+    ttlSecondsAfterFinished: 15
+    template:
+    metadata:
+        labels:
+        app: job-5
+        topology: jobs-tp
+        scheduleTimeoutSeconds: "30"
+        complete-depends-on: job-3
+    spec:
+        schedulerName: scheduler-framework-sample
+        containers:
+        - name: job-5
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 60 && echo Ended: $(date)"]
+        restartPolicy: Never
+    backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: job-6
+spec:
+    ttlSecondsAfterFinished: 15
+    template:
+    metadata:
+        labels:
+        app: job-6
+        topology: jobs-tp
+        scheduleTimeoutSeconds: "30"
+        complete-depends-on: job-4__job-5
+    spec:
+        schedulerName: scheduler-framework-sample
+        containers:
+        - name: job-6
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+        restartPolicy: Never
+    backoffLimit: 3

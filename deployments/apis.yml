@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-1
+  labels:
+    app: api-1
+spec:
+  selector:
+    matchLabels:
+      app: api-1
+  template:
+    metadata:
+      labels:
+        app: api-1
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-1
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-2
+  labels:
+    app: api-2
+spec:
+  selector:
+    matchLabels:
+      app: api-2
+  template:
+    metadata:
+      labels:
+        app: api-2
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-2
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-3
+  labels:
+    app: api-3
+spec:
+  selector:
+    matchLabels:
+      app: api-3
+  template:
+    metadata:
+      labels:
+        app: api-3
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+        running-depends-on: api-1__api-2
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-3
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-4
+  labels:
+    app: api-4
+spec:
+  selector:
+    matchLabels:
+      app: api-4
+  template:
+    metadata:
+      labels:
+        app: api-4
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+        running-depends-on: api-3
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-4
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-5
+  labels:
+    app: api-5
+spec:
+  selector:
+    matchLabels:
+      app: api-5
+  template:
+    metadata:
+      labels:
+        app: api-5
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+        running-depends-on: api-3
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-5
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-6
+  labels:
+    app: api-6
+spec:
+  selector:
+    matchLabels:
+      app: api-6
+  template:
+    metadata:
+      labels:
+        app: api-6
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+        running-depends-on: api-4__api-5
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-6
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
