@@ -186,11 +186,12 @@ func IsTerminating(pod *v1.Pod) bool {
 /* POD MANAGEMENT DATA STRUCTURE */
 
 type SamplePodState struct {
-	status string
+	status         string
+	statusUpdateAt int64
 }
 
 func (podState SamplePodState) String() string {
-	return fmt.Sprintf("{status:%v}", podState.status)
+	return fmt.Sprintf("{status:%v, statusUpdateAt: %v}", podState.status, podState.statusUpdateAt)
 }
 
 type SamplePod struct {
@@ -198,13 +199,14 @@ type SamplePod struct {
 	topology               string
 	scheduleTimeoutSeconds int
 	status                 string
+	statusUpdateAt         int64
 	completeDependsOn      map[string]*SamplePodState
 	runningDependsOn       map[string]*SamplePodState
 }
 
 func (pod SamplePod) String() string {
-	return fmt.Sprintf("{app: %v, topology: %v,scheduleTimeoutSeconds:%v, status:%v, runningDependsOn: %v, completeDependsOn: %v}",
-		pod.app, pod.topology, pod.scheduleTimeoutSeconds, pod.status, pod.runningDependsOn, pod.completeDependsOn)
+	return fmt.Sprintf("{app: %v, topology: %v,scheduleTimeoutSeconds:%v, status:%v, statusUpdateAt %v, runningDependsOn: %v, completeDependsOn: %v}",
+		pod.app, pod.topology, pod.scheduleTimeoutSeconds, pod.status, pod.statusUpdateAt, pod.runningDependsOn, pod.completeDependsOn)
 }
 
 func InitSamplePodsMap() map[string]*SamplePod {
@@ -218,6 +220,7 @@ func InitDependenciesPodState(dependencies []string, podStateMap map[string]*Sam
 		podStateMap[dependency] = podState
 		if ok {
 			podState.status = dependencyGlobalValue.status
+			podState.statusUpdateAt = dependencyGlobalValue.statusUpdateAt
 		}
 	}
 }
@@ -239,6 +242,7 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.topology = topology
 	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
 	samplePod.status = PENDING_STATUS
+	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 	samplePod.runningDependsOn = make(map[string]*SamplePodState)
 	InitDependenciesPodState(runningDependsOn, samplePod.runningDependsOn, samplePods)
 	samplePod.completeDependsOn = make(map[string]*SamplePodState)
@@ -249,12 +253,14 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 func MarkDependencyOnAsError(app string, pod *SamplePod) {
 	runningDeppency, ok := pod.runningDependsOn[app]
 	if ok != false {
-		runningDeppency.status = UNDEFINED_STATUS
+		runningDeppency.status = ERROR_STATUS
+		runningDeppency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 
 	completeDependency, ok := pod.completeDependsOn[app]
 	if ok != false {
-		completeDependency.status = UNDEFINED_STATUS
+		completeDependency.status = ERROR_STATUS
+		completeDependency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 }
 
@@ -268,7 +274,8 @@ func MarkPodAsError(pod *v1.Pod, samplePods map[string]*SamplePod) {
 
 	podTopology := samplePod.topology
 	/* mark on yourself */
-	samplePod.status = UNDEFINED_STATUS
+	samplePod.status = ERROR_STATUS
+	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -281,11 +288,13 @@ func MarkDependencyOnAsUndefined(app string, pod *SamplePod) {
 	runningDeppency, ok := pod.runningDependsOn[app]
 	if ok != false {
 		runningDeppency.status = UNDEFINED_STATUS
+		runningDeppency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 
 	completeDependency, ok := pod.completeDependsOn[app]
 	if ok != false {
 		completeDependency.status = UNDEFINED_STATUS
+		completeDependency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 }
 
@@ -300,6 +309,7 @@ func MarkPodAsUndefined(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = UNDEFINED_STATUS
+	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -312,11 +322,13 @@ func MarkDependencyOnAsPending(app string, pod *SamplePod) {
 	runningDeppency, ok := pod.runningDependsOn[app]
 	if ok != false {
 		runningDeppency.status = PENDING_STATUS
+		runningDeppency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 
 	completeDependency, ok := pod.completeDependsOn[app]
 	if ok != false {
 		completeDependency.status = PENDING_STATUS
+		completeDependency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 }
 
@@ -331,6 +343,7 @@ func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = PENDING_STATUS
+	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -343,11 +356,13 @@ func MarkDependencyOnAsRunning(app string, pod *SamplePod) {
 	runningDeppency, ok := pod.runningDependsOn[app]
 	if ok != false {
 		runningDeppency.status = RUNNING_STATUS
+		runningDeppency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 
 	completeDependency, ok := pod.completeDependsOn[app]
 	if ok != false {
 		completeDependency.status = RUNNING_STATUS
+		completeDependency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 }
 
@@ -362,6 +377,7 @@ func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = RUNNING_STATUS
+	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -374,11 +390,14 @@ func MarkDependencyOnAsCompleted(app string, pod *SamplePod) {
 	runningDeppency, ok := pod.runningDependsOn[app]
 	if ok != false {
 		runningDeppency.status = COMPLETED_STATUS
+		runningDeppency.statusUpdateAt = helpers.GetCurrentTimestamp()
+
 	}
 
 	completeDependency, ok := pod.completeDependsOn[app]
 	if ok != false {
 		completeDependency.status = COMPLETED_STATUS
+		completeDependency.statusUpdateAt = helpers.GetCurrentTimestamp()
 	}
 }
 
@@ -393,6 +412,7 @@ func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = COMPLETED_STATUS
+	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {

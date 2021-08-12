@@ -1,5 +1,7 @@
 package helpers
 
+import "time"
+
 func RemoveEmptyStrings(s []string) []string {
 	var r []string
 	for _, str := range s {
@@ -26,4 +28,8 @@ func RemoveStringInSlice(r string, s []string) []string {
 		}
 	}
 	return s
+}
+
+func GetCurrentTimestamp() int64 {
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }
