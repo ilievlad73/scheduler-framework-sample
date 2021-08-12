@@ -13,7 +13,7 @@ spec:
       schedulerName: scheduler-framework-sample
       containers:
       - name: job-1
-        image: perl
-        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(5000)"]
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
       restartPolicy: Never
   backoffLimit: 3
