@@ -13,11 +13,13 @@ import (
 /* LABELS UTILS */
 
 const (
-	PENDING_STATUS    = "Pending"
-	RUNNING_STATUS    = "Running"
-	COMPLETED_STATUS  = "Succeeded"
-	TERMINATED_STATUS = "Terminating"
-	UNDEFINED_STATUS  = ""
+	PENDING_STATUS            = "Pending"
+	RUNNING_STATUS            = "Running"
+	COMPLETED_STATUS          = "Succeeded"
+	TERMINATED_STATUS         = "Terminating"
+	ERROR_STATUS              = "Error"
+	CONTAINER_CREATING_STATUS = "ContainerCreating"
+	UNDEFINED_STATUS          = ""
 )
 
 func ScheduleTimeout(pod *v1.Pod) int {
