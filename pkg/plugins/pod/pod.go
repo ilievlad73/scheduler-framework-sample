@@ -288,7 +288,7 @@ func MarkPodAsError(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	appName := AppName(pod)
 	samplePod, ok := samplePods[AppName(pod)]
 	if ok == false {
-		klog.Infof("Mark pod as pending failed, pod %v not exists in data structure", pod.Name)
+		klog.Infof("Mark pod as error failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
 
@@ -322,7 +322,7 @@ func MarkPodAsUndefined(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	appName := AppName(pod)
 	samplePod, ok := samplePods[AppName(pod)]
 	if ok == false {
-		klog.Infof("Mark pod as pending failed, pod %v not exists in data structure", pod.Name)
+		klog.Infof("Mark pod as undefined failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
 
