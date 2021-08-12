@@ -7,8 +7,6 @@ import (
 
 	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/helpers"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
 )
 
@@ -85,106 +83,106 @@ func IsTerminating(pod *v1.Pod) bool {
 
 /* BIND STRATEGY UTILS */
 
-func IsBind(podName string, bindMap map[string]bool) bool {
-	isBind, ok := bindMap[podName]
-	if ok != true {
-		return false
-	}
+// func IsBind(podName string, bindMap map[string]bool) bool {
+// 	isBind, ok := bindMap[podName]
+// 	if ok != true {
+// 		return false
+// 	}
 
-	return isBind
-}
+// 	return isBind
+// }
 
-func MarkAsBind(podName string, bindMap map[string]bool) {
-	bindMap[podName] = true
-}
+// func MarkAsBind(podName string, bindMap map[string]bool) {
+// 	bindMap[podName] = true
+// }
 
-func MarkPodAsUnbind(podName string, bindMap map[string]bool) {
-	delete(bindMap, podName)
-}
+// func MarkPodAsUnbind(podName string, bindMap map[string]bool) {
+// 	delete(bindMap, podName)
+// }
 
-func CheckAllDependenciesBind(podNames []string, bindMap map[string]bool) bool {
-	for _, s := range podNames {
-		if IsBind(s, bindMap) == false {
+// func CheckAllDependenciesBind(podNames []string, bindMap map[string]bool) bool {
+// 	for _, s := range podNames {
+// 		if IsBind(s, bindMap) == false {
 
-			return false
-		}
-	}
+// 			return false
+// 		}
+// 	}
 
-	return true
-}
+// 	return true
+// }
 
 /* END BIND STRATEGY UTILS */
 
-func displayPodMetadataName(pod *v1.Pod) {
-	for key, value := range pod.Labels {
-		fmt.Printf("Labels: key[%s] value[%s]\n", key, value)
-	}
+// func displayPodMetadataName(pod *v1.Pod) {
+// 	for key, value := range pod.Labels {
+// 		fmt.Printf("Labels: key[%s] value[%s]\n", key, value)
+// 	}
 
-	for key, value := range pod.ObjectMeta.Labels {
-		fmt.Printf("Meta labels: key[%s] value[%s]\n", key, value)
-	}
-}
+// 	for key, value := range pod.ObjectMeta.Labels {
+// 		fmt.Printf("Meta labels: key[%s] value[%s]\n", key, value)
+// 	}
+// }
 
-/* PODS UTILS */
+// /* PODS UTILS */
 
-func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
-	podsInfo, err := clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
+// func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
+// 	podsInfo, err := clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	/* remove current pod from the list */
-	filteredPods := []v1.Pod{}
-	for i := range podsInfo.Items {
-		if podsInfo.Items[i].GetName() != pod.GetName() {
-			filteredPods = append(filteredPods, podsInfo.Items[i])
-		}
-	}
+// 	/* remove current pod from the list */
+// 	filteredPods := []v1.Pod{}
+// 	for i := range podsInfo.Items {
+// 		if podsInfo.Items[i].GetName() != pod.GetName() {
+// 			filteredPods = append(filteredPods, podsInfo.Items[i])
+// 		}
+// 	}
 
-	for _, otherPod := range filteredPods {
-		klog.V(3).Infof("Range: Pod app: %v, Pod name: %v, phase %v", AppName(&otherPod), otherPod.Name, otherPod.Status.Phase)
-	}
+// 	for _, otherPod := range filteredPods {
+// 		klog.V(3).Infof("Range: Pod app: %v, Pod name: %v, phase %v", AppName(&otherPod), otherPod.Name, otherPod.Status.Phase)
+// 	}
 
-	return filteredPods, nil
-}
+// 	return filteredPods, nil
+// }
 
-func AreCompleteDependsOnCompleted(otherPods []v1.Pod, pod *v1.Pod) bool {
-	podCompleteDependsOn := CompleteDependsOnList(pod)
-	if len(podCompleteDependsOn) == 0 {
-		return true
-	}
+// func AreCompleteDependsOnCompleted(otherPods []v1.Pod, pod *v1.Pod) bool {
+// 	podCompleteDependsOn := CompleteDependsOnList(pod)
+// 	if len(podCompleteDependsOn) == 0 {
+// 		return true
+// 	}
 
-	if len(otherPods) == 0 {
-		return false
-	}
+// 	if len(otherPods) == 0 {
+// 		return false
+// 	}
 
-	for _, otherPod := range otherPods {
-		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsCompleted((&otherPod)) {
-			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
-		}
-	}
+// 	for _, otherPod := range otherPods {
+// 		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsCompleted((&otherPod)) {
+// 			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
+// 		}
+// 	}
 
-	return len(podCompleteDependsOn) == 0
-}
+// 	return len(podCompleteDependsOn) == 0
+// }
 
-func AreCompleteDependsOnRunning(otherPods []v1.Pod, pod *v1.Pod) bool {
-	podCompleteDependsOn := CompleteDependsOnList(pod)
-	if len(podCompleteDependsOn) == 0 {
-		return true
-	}
+// func AreCompleteDependsOnRunning(otherPods []v1.Pod, pod *v1.Pod) bool {
+// 	podCompleteDependsOn := CompleteDependsOnList(pod)
+// 	if len(podCompleteDependsOn) == 0 {
+// 		return true
+// 	}
 
-	if len(otherPods) == 0 {
-		return false
-	}
+// 	if len(otherPods) == 0 {
+// 		return false
+// 	}
 
-	for _, otherPod := range otherPods {
-		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsRunning((&otherPod)) {
-			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
-		}
-	}
+// 	for _, otherPod := range otherPods {
+// 		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsRunning((&otherPod)) {
+// 			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
+// 		}
+// 	}
 
-	return len(podCompleteDependsOn) == 0
-}
+// 	return len(podCompleteDependsOn) == 0
+// }
 
 /* PODS END UTILS */
 
