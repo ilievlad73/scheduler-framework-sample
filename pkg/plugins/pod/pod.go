@@ -42,18 +42,8 @@ func CompleteDependsOnList(pod *v1.Pod) []string {
 	return helpers.RemoveEmptyStrings(strings.Split(labelsString, "__"))
 }
 
-func CompleteDependencyOffList(pod *v1.Pod) []string {
-	labelsString := pod.Labels["complete-dependency-off"]
-	return helpers.RemoveEmptyStrings(strings.Split(labelsString, "__"))
-}
-
 func RunningDependsOnList(pod *v1.Pod) []string {
 	labelsString := pod.Labels["running-depends-on"]
-	return helpers.RemoveEmptyStrings(strings.Split(labelsString, "__"))
-}
-
-func RunningDependencyOffList(pod *v1.Pod) []string {
-	labelsString := pod.Labels["running-dependency-off"]
 	return helpers.RemoveEmptyStrings(strings.Split(labelsString, "__"))
 }
 
