@@ -269,7 +269,7 @@ func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
-			MarkCompleteDependencyOnAsRunning(appName, otherPod)
+			MarkCompleteDependencyOnAsPending(appName, otherPod)
 		}
 	}
 }
