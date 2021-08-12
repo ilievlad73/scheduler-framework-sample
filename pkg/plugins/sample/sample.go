@@ -90,7 +90,7 @@ func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod 
 }
 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
-	klog.V(3).Infof("Permit allows the pod: %v to be scheduled on the node", pod.Name, nodeName)
+	klog.V(3).Infof("Permit the pod: %v", pod.Name)
 
 	if podUtils.AreCompleteDependsOnCompletedV2(pod, pl.samplePods) == false {
 		klog.Infof("Pod: %v is waiting to be scheduled to node: %v", pod.Name, nodeName)

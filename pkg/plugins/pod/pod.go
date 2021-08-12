@@ -318,10 +318,8 @@ func AreCompleteDependsOnCompletedV2(pod *v1.Pod, samplePods map[string]*SampleP
 	appName := AppName(pod)
 	podSample := samplePods[appName]
 	completeDependsOn := podSample.completeDependsOn
-	klog.Infof("AreCompleteDependsOnCompletedV2 %v", completeDependsOn)
-	klog.Infof("AreCompleteDependsOnCompletedV2 pod deps list %v", CompleteDependsOnList(pod))
 	for _, dependencyPod := range completeDependsOn {
-		if dependencyPod.status == COMPLETED_STATUS {
+		if dependencyPod.status != COMPLETED_STATUS {
 			return false
 		}
 	}
@@ -334,12 +332,11 @@ func AreCompleteDependsOnRunningV2(pod *v1.Pod, samplePods map[string]*SamplePod
 	podSample := samplePods[appName]
 	completeDependsOn := podSample.completeDependsOn
 	for _, dependencyPod := range completeDependsOn {
-		if dependencyPod.status == RUNNING_STATUS {
+		if dependencyPod.status != RUNNING_STATUS {
 			return false
 		}
 	}
 
-	klog.Infof("AreCompleteDependsOnRunningV2 returning true")
 	return true
 }
 
