@@ -141,7 +141,7 @@ func New(plArgs *runtime.Unknown, handle framework.FrameworkHandle) (framework.P
 	}
 
 	factory := informers.NewSharedInformerFactory(clientset, time.Hour*24)
-	controller := informerUtils.NewPodLoggingController(factory, handle, clientset, samplePods)
+	controller := informerUtils.NewPodLoggingController(factory, handle, clientset, samplePods, Name)
 
 	stop := make(chan struct{})
 	err = controller.Run(stop)

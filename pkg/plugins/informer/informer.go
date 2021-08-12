@@ -28,6 +28,7 @@ type PodLoggingController struct {
 	frameworkHandler framework.FrameworkHandle
 	clientset        *kubernetes.Clientset
 	samplePods       map[string]*podUtils.SamplePod
+	sampleName       string
 }
 
 // Run starts shared informers and waits for the shared informer cache to
@@ -74,7 +75,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 			pod := waitingPod.GetPod()
 			if podUtils.AreCompleteDependsOnCompletedV2(pod, c.samplePods) {
 				klog.Infof("[Informer] Allow pod %v to pass permit", pod.Name)
-				waitingPod.Allow(pod.Name)
+				waitingPod.Allow(c.sampleName)
 			}
 		})
 	}
@@ -89,7 +90,7 @@ func (c *PodLoggingController) podDelete(obj interface{}) {
 
 // NewPodLoggingController creates a PodLoggingController
 func NewPodLoggingController(informerFactory informers.SharedInformerFactory, handle framework.FrameworkHandle,
-	clientset *kubernetes.Clientset, samplePods map[string]*podUtils.SamplePod) *PodLoggingController {
+	clientset *kubernetes.Clientset, samplePods map[string]*podUtils.SamplePod, sampleName string) *PodLoggingController {
 	podInformer := informerFactory.Core().V1().Pods()
 
 	c := &PodLoggingController{
@@ -98,6 +99,7 @@ func NewPodLoggingController(informerFactory informers.SharedInformerFactory, ha
 		frameworkHandler: handle,
 		clientset:        clientset,
 		samplePods:       samplePods,
+		sampleName:       sampleName,
 	}
 	podInformer.Informer().AddEventHandler(
 		// Your custom resource event handlers.
