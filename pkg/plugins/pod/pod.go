@@ -14,6 +14,13 @@ import (
 
 /* LABELS UTILS */
 
+const (
+	PENDING_STATUS    = "Pending"
+	RUNNING_STATUS    = "Running"
+	COMPLETED_STATUS  = "Succeeded"
+	TERMINATED_STATUS = "Terminating"
+)
+
 func ScheduleTimeout(pod *v1.Pod) int {
 	scheduleTimeoutSeconds := pod.Labels["scheduleTimeoutSeconds"]
 	timeoutSeconds, err := strconv.Atoi(scheduleTimeoutSeconds)
@@ -59,19 +66,19 @@ func StatusPhase(pod *v1.Pod) string {
 }
 
 func IsPending(pod *v1.Pod) bool {
-	return StatusPhase(pod) == "Pending"
+	return StatusPhase(pod) == PENDING_STATUS
 }
 
 func IsCompleted(pod *v1.Pod) bool {
-	return StatusPhase(pod) == "Succeeded"
+	return StatusPhase(pod) == COMPLETED_STATUS
 }
 
 func IsRunning(pod *v1.Pod) bool {
-	return StatusPhase(pod) == "Running"
+	return StatusPhase(pod) == RUNNING_STATUS
 }
 
 func IsTerminating(pod *v1.Pod) bool {
-	return StatusPhase(pod) == "Terminating"
+	return StatusPhase(pod) == TERMINATED_STATUS
 }
 
 /* END STATUS UTILS */
@@ -181,50 +188,27 @@ func AreCompleteDependsOnRunning(otherPods []v1.Pod, pod *v1.Pod) bool {
 
 /* PODS END UTILS */
 
-/**
-*
-*
-podAppName -> { appName,
-				scheduleTimeoutSeconds,
-				completeDependsOnStatus: podAppName -> {
-															isRunning: false,
-															isCompleted: false,
-															isPending: false
-														}
-
-				}
-
-*/
-
 /* POD MANAGEMENT DATA STRUCTURE */
 
-/* TODO UPDATE THIS, switch to a single status value due to complicated conditions */
-
 type SamplePodState struct {
-	isPending    bool
-	isRunning    bool
-	isCompleted  bool
-	isTerminated bool
+	status string
 }
 
 func (podState SamplePodState) String() string {
-	return fmt.Sprintf("{isPending:%v, isRunning:%v, isCompleted:%v, isTerminated: %v}", podState.isPending, podState.isRunning, podState.isCompleted, podState.isTerminated)
+	return fmt.Sprintf("{status:%v}", podState.status)
 }
 
 type SamplePod struct {
 	app                    string
 	topology               string
 	scheduleTimeoutSeconds int
-	isPending              bool
-	isRunning              bool
-	isCompleted            bool
-	isTerminated           bool
+	status                 string
 	completeDependsOn      map[string]*SamplePodState
 }
 
 func (pod SamplePod) String() string {
-	return fmt.Sprintf("{app: %v, topology: %v,scheduleTimeoutSeconds:%v, isPending:%v, isRunning:%v, isCompleted:%v, isTerminated: %v, completeDependsOn: %v}",
-		pod.app, pod.topology, pod.scheduleTimeoutSeconds, pod.isPending, pod.isRunning, pod.isCompleted, pod.isTerminated, pod.completeDependsOn)
+	return fmt.Sprintf("{app: %v, topology: %v,scheduleTimeoutSeconds:%v, status:%v, completeDependsOn: %v}",
+		pod.app, pod.topology, pod.scheduleTimeoutSeconds, pod.status, pod.completeDependsOn)
 }
 
 func InitSamplePodsMap() map[string]*SamplePod {
@@ -235,10 +219,7 @@ func InitPodState(dependencies []string, podStateMap map[string]*SamplePodState,
 	for _, dependency := range dependencies {
 		podState := new(SamplePodState)
 		dependencyGlobalValue := samplePods[dependency]
-		podState.isPending = dependencyGlobalValue.isPending
-		podState.isRunning = dependencyGlobalValue.isRunning
-		podState.isCompleted = dependencyGlobalValue.isCompleted
-		podState.isTerminated = dependencyGlobalValue.isTerminated
+		podState.status = dependencyGlobalValue.status
 		podStateMap[dependency] = podState
 	}
 }
@@ -268,10 +249,7 @@ func MarkCompleteDependencyOnAsPending(app string, pod *SamplePod) {
 		return
 	}
 
-	dependency.isRunning = false
-	dependency.isCompleted = false
-	dependency.isPending = true
-	dependency.isTerminated = false
+	dependency.status = PENDING_STATUS
 }
 
 func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
@@ -280,10 +258,7 @@ func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 
 	/* mark on yourself */
-	samplePod.isRunning = false
-	samplePod.isCompleted = false
-	samplePod.isPending = true
-	samplePod.isTerminated = false
+	samplePod.status = PENDING_STATUS
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -298,10 +273,7 @@ func MarkCompleteDependencyOnAsRunning(app string, pod *SamplePod) {
 		return
 	}
 
-	dependency.isRunning = true
-	dependency.isCompleted = false
-	dependency.isPending = false
-	dependency.isTerminated = false
+	dependency.status = RUNNING_STATUS
 }
 
 func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
@@ -310,10 +282,7 @@ func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	podTopology := samplePod.topology
 
 	/* mark on yourself */
-	samplePod.isCompleted = false
-	samplePod.isPending = false
-	samplePod.isTerminated = false
-	samplePod.isRunning = true
+	samplePod.status = RUNNING_STATUS
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -327,10 +296,7 @@ func MarkCompleteDependencyOnAsCompleted(app string, pod *SamplePod) {
 	if ok == false {
 		return
 	}
-	dependency.isRunning = false
-	dependency.isCompleted = true
-	dependency.isPending = false
-	dependency.isTerminated = false
+	dependency.status = COMPLETED_STATUS
 }
 
 func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
@@ -338,10 +304,7 @@ func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	samplePod := samplePods[AppName(pod)]
 	podTopology := samplePod.topology
 	/* mark on yourself */
-	samplePod.isRunning = false
-	samplePod.isCompleted = true
-	samplePod.isPending = false
-	samplePod.isTerminated = false
+	samplePod.status = COMPLETED_STATUS
 
 	for _, otherPod := range samplePods {
 		if otherPod.topology == podTopology {
@@ -358,7 +321,7 @@ func AreCompleteDependsOnCompletedV2(pod *v1.Pod, samplePods map[string]*SampleP
 	klog.Infof("AreCompleteDependsOnCompletedV2 %v", completeDependsOn)
 	klog.Infof("AreCompleteDependsOnCompletedV2 pod deps list %v", CompleteDependsOnList(pod))
 	for _, dependencyPod := range completeDependsOn {
-		if dependencyPod.isCompleted == false && (dependencyPod.isPending == true || dependencyPod.isRunning == true) {
+		if dependencyPod.status == COMPLETED_STATUS {
 			return false
 		}
 	}
@@ -371,7 +334,7 @@ func AreCompleteDependsOnRunningV2(pod *v1.Pod, samplePods map[string]*SamplePod
 	podSample := samplePods[appName]
 	completeDependsOn := podSample.completeDependsOn
 	for _, dependencyPod := range completeDependsOn {
-		if dependencyPod.isRunning == false {
+		if dependencyPod.status == RUNNING_STATUS {
 			return false
 		}
 	}
@@ -379,3 +342,5 @@ func AreCompleteDependsOnRunningV2(pod *v1.Pod, samplePods map[string]*SamplePod
 	klog.Infof("AreCompleteDependsOnRunningV2 returning true")
 	return true
 }
+
+/* END POD MANAGEMENT DATA STRUCTURE */
