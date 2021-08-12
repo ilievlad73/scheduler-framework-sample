@@ -238,6 +238,7 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.app = app
 	samplePod.topology = topology
 	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
+	samplePod.status = PENDING_STATUS
 	samplePod.completeDependsOn = make(map[string]*SamplePodState)
 	InitPodState(completeDependsOn, samplePod.completeDependsOn, samplePods)
 	samplePods[app] = samplePod
@@ -254,9 +255,13 @@ func MarkCompleteDependencyOnAsPending(app string, pod *SamplePod) {
 
 func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	appName := AppName(pod)
-	samplePod := samplePods[AppName(pod)]
-	podTopology := samplePod.topology
+	samplePod, ok := samplePods[AppName(pod)]
+	if ok == false {
+		klog.Infof("Mark pod as pending failed, pod %v not exists in data structure", pod.Name)
+		return
+	}
 
+	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = PENDING_STATUS
 
@@ -278,9 +283,13 @@ func MarkCompleteDependencyOnAsRunning(app string, pod *SamplePod) {
 
 func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	appName := AppName(pod)
-	samplePod := samplePods[AppName(pod)]
-	podTopology := samplePod.topology
+	samplePod, ok := samplePods[AppName(pod)]
+	if ok == false {
+		klog.Infof("Mark pod as running failed, pod %v not exists in data structure", pod.Name)
+		return
+	}
 
+	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = RUNNING_STATUS
 
@@ -301,7 +310,12 @@ func MarkCompleteDependencyOnAsCompleted(app string, pod *SamplePod) {
 
 func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
 	appName := AppName(pod)
-	samplePod := samplePods[AppName(pod)]
+	samplePod, ok := samplePods[AppName(pod)]
+	if ok == false {
+		klog.Infof("Mark pod as complete failed, pod %v not exists in data structure", pod.Name)
+		return
+	}
+
 	podTopology := samplePod.topology
 	/* mark on yourself */
 	samplePod.status = COMPLETED_STATUS
