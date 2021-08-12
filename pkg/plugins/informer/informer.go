@@ -73,7 +73,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 
 		c.frameworkHandler.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
 			pod := waitingPod.GetPod()
-			if podUtils.AreCompleteDependsOnCompletedV2(pod, c.samplePods) {
+			if podUtils.AreCompleteDependsOnCompleted(pod, c.samplePods) {
 				klog.Infof("[Informer] Allow pod %v to pass permit", pod.Name)
 				waitingPod.Allow(c.sampleName)
 			}
