@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Calling Sleep method
-	time.Sleep(15 * time.Second)
+	time.Sleep(5 * time.Second)
 	log.Fatal("Exiting with error")
 
 	// start the web server on port and accept requests
