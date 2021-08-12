@@ -32,6 +32,16 @@ func ScheduleTimeout(pod *v1.Pod) int {
 	return timeoutSeconds
 }
 
+func SkipScheduleTimes(pod *v1.Pod) int {
+	skipSchedulerTimes := pod.Labels["skipSchedulerTimes"]
+	skipScheduler, err := strconv.Atoi(skipSchedulerTimes)
+	if err != nil {
+		return 0 // default skip schedule times
+	}
+
+	return skipScheduler
+}
+
 func AppName(pod *v1.Pod) string {
 	return pod.Labels["app"]
 }
@@ -200,6 +210,7 @@ type SamplePod struct {
 	scheduleTimeoutSeconds int
 	status                 string
 	statusUpdateAt         int64
+	skipScheduleTimes      int
 	completeDependsOn      map[string]*SamplePodState
 	runningDependsOn       map[string]*SamplePodState
 }
@@ -229,7 +240,8 @@ func RemoveSamplePod(app string, samplePods map[string]*SamplePod) {
 	delete(samplePods, app)
 }
 
-func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, completeDependsOn []string, runningDependsOn []string, samplePods map[string]*SamplePod) {
+func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int,
+	completeDependsOn []string, runningDependsOn []string, skipScheduleTimes int, samplePods map[string]*SamplePod) {
 	/* check if somebody else initialized this */
 	existingSamplePod, ok := samplePods[app]
 	if ok {
@@ -245,6 +257,7 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int, comp
 	samplePod.app = app
 	samplePod.topology = topology
 	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
+	samplePod.skipScheduleTimes = skipScheduleTimes
 	samplePod.status = PENDING_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
 	samplePod.runningDependsOn = make(map[string]*SamplePodState)
@@ -478,6 +491,19 @@ func AreRunningDependsOnRunning(pod *v1.Pod, samplePods map[string]*SamplePod) b
 	return true
 }
 
+func AreRunningDependsOnRunningSince(pod *v1.Pod, samplePods map[string]*SamplePod, timeoutMilliseconds int64) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	runningDependsOn := podSample.runningDependsOn
+	for _, dependencyPod := range runningDependsOn {
+		if dependencyPod.status != RUNNING_STATUS || (helpers.GetCurrentTimestamp()-dependencyPod.statusUpdateAt) < timeoutMilliseconds {
+			return false
+		}
+	}
+
+	return true
+}
+
 func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 	appName := AppName(pod)
 	podSample := samplePods[appName]
@@ -488,6 +514,21 @@ func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*Sam
 		}
 	}
 
+	return true
+}
+
+func ShouldSkipScheduler(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	skipSchedulerTimes := podSample.skipScheduleTimes
+
+	if skipSchedulerTimes == 0 {
+		return false
+	}
+
+	klog.Infof("Skipping scheduler cycle due to skipSchedulerTimes %v", skipSchedulerTimes)
+
+	skipSchedulerTimes--
 	return true
 }
 
