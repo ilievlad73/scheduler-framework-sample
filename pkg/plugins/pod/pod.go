@@ -507,7 +507,7 @@ func AreRunningDependsOnRunningSince(pod *v1.Pod, samplePods map[string]*SampleP
 	return true
 }
 
-func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+func AreRunningDependsOnPendingOrRunning(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 	appName := AppName(pod)
 	podSample := samplePods[appName]
 	runningDependsOn := podSample.runningDependsOn
@@ -520,7 +520,7 @@ func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*Sam
 	return true
 }
 
-func AreRunninDependsOnPendingLessThanTwoLayers(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+func AreRunninDependsOnPendingOrRunningLessThanTwoLayers(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 	appName := AppName(pod)
 	podSample := samplePods[appName]
 	runningDependsOn := podSample.runningDependsOn

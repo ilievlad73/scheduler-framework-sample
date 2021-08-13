@@ -62,14 +62,22 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	klog.V(3).Infof("Sample pods from prefilter", pl.samplePods[podUtils.AppName(pod)])
 
 	if podUtils.ShouldSkipScheduler(pod, pl.samplePods) {
+		klog.V(3).Infof("Reject due to ShouldSkipScheduler")
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
 
-	if !podUtils.AreRunningDependsOnRunningOrPending(pod, pl.samplePods) {
+	if !podUtils.AreRunningDependsOnPendingOrRunning(pod, pl.samplePods) {
+		klog.V(3).Infof("Reject due to AreRunningDependsOnRunningOrPending")
+		return framework.NewStatus(framework.Unschedulable, "")
+	}
+
+	if podUtils.AreRunninDependsOnPendingOrRunningLessThanTwoLayers(pod, pl.samplePods) {
+		klog.V(3).Infof("Reject due to AreRunninDependsOnPendingLessThanTwoLayers")
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
 
 	if !podUtils.AreCompleteDependsOnRunningOrComplete(pod, pl.samplePods) {
+		klog.V(3).Infof("Reject due to AreCompleteDependsOnRunningOrComplete")
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
 
