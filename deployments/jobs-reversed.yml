@@ -7,7 +7,8 @@ spec:
     metadata:
       labels:
         app: job-1
-        topology: jobs-tp
+        topology: jobs-reversed-tp
+        complete-depends-on: job-2__job-3
     spec:
       schedulerName: scheduler-framework-sample
       containers:
@@ -26,7 +27,8 @@ spec:
     metadata:
       labels:
         app: job-2
-        topology: jobs-tp
+        topology: jobs-reversed-tp
+        complete-depends-on: job-4
     spec:
       schedulerName: scheduler-framework-sample
       containers:
@@ -45,8 +47,8 @@ spec:
     metadata:
       labels:
         app: job-3
-        topology: jobs-tp
-        complete-depends-on: job-1__job-2
+        topology: jobs-reversed-tp
+        complete-depends-on: job-4
     spec:
       schedulerName: scheduler-framework-sample
       containers:
@@ -65,8 +67,8 @@ spec:
     metadata:
       labels:
         app: job-4
-        topology: jobs-tp
-        complete-depends-on: job-3
+        topology: jobs-reversed-tp
+        complete-depends-on: job-5__job-6
     spec:
       schedulerName: scheduler-framework-sample
       containers:
@@ -85,8 +87,7 @@ spec:
     metadata:
       labels:
         app: job-5
-        topology: jobs-tp
-        complete-depends-on: job-3
+        topology: jobs-reversed-tp
     spec:
       schedulerName: scheduler-framework-sample
       containers:
@@ -105,8 +106,7 @@ spec:
     metadata:
       labels:
         app: job-6
-        topology: jobs-tp
-        complete-depends-on: job-4__job-5
+        topology: jobs-reversed-tp
     spec:
       schedulerName: scheduler-framework-sample
       containers:
