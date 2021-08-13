@@ -544,9 +544,20 @@ func AreRunninDependsOnPendingOrRunningLessThanTwoLayers(pod *v1.Pod, samplePods
 		if !ok {
 			return false
 		}
-		for _, secondDependencyPod := range dependencySamplePod.runningDependsOn {
-			if secondDependencyPod.status != RUNNING_STATUS {
+		for secondDependencyPodName, secondDependencyPod := range dependencySamplePod.runningDependsOn {
+			if secondDependencyPod.status != RUNNING_STATUS && dependencyPod.status != PENDING_STATUS {
 				return false
+			}
+
+			/* third depth layer */
+			secondDependencySamplePod, ok := samplePods[secondDependencyPodName]
+			if !ok {
+				return false
+			}
+			for _, thirdDependencyPod := range secondDependencySamplePod.runningDependsOn {
+				if thirdDependencyPod.status != RUNNING_STATUS {
+					return false
+				}
 			}
 		}
 	}
