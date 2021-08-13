@@ -98,113 +98,6 @@ func IsTerminating(pod *v1.Pod) bool {
 	return StatusPhase(pod) == TERMINATED_STATUS
 }
 
-/* END STATUS UTILS */
-
-/* BIND STRATEGY UTILS */
-
-// func IsBind(podName string, bindMap map[string]bool) bool {
-// 	isBind, ok := bindMap[podName]
-// 	if ok != true {
-// 		return false
-// 	}
-
-// 	return isBind
-// }
-
-// func MarkAsBind(podName string, bindMap map[string]bool) {
-// 	bindMap[podName] = true
-// }
-
-// func MarkPodAsUnbind(podName string, bindMap map[string]bool) {
-// 	delete(bindMap, podName)
-// }
-
-// func CheckAllDependenciesBind(podNames []string, bindMap map[string]bool) bool {
-// 	for _, s := range podNames {
-// 		if IsBind(s, bindMap) == false {
-
-// 			return false
-// 		}
-// 	}
-
-// 	return true
-// }
-
-/* END BIND STRATEGY UTILS */
-
-// func displayPodMetadataName(pod *v1.Pod) {
-// 	for key, value := range pod.Labels {
-// 		fmt.Printf("Labels: key[%s] value[%s]\n", key, value)
-// 	}
-
-// 	for key, value := range pod.ObjectMeta.Labels {
-// 		fmt.Printf("Meta labels: key[%s] value[%s]\n", key, value)
-// 	}
-// }
-
-// /* PODS UTILS */
-
-// func OtherPods(clientset *kubernetes.Clientset, pod *v1.Pod) ([]v1.Pod, error) {
-// 	podsInfo, err := clientset.CoreV1().Pods(pod.GetNamespace()).List(metav1.ListOptions{})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	/* remove current pod from the list */
-// 	filteredPods := []v1.Pod{}
-// 	for i := range podsInfo.Items {
-// 		if podsInfo.Items[i].GetName() != pod.GetName() {
-// 			filteredPods = append(filteredPods, podsInfo.Items[i])
-// 		}
-// 	}
-
-// 	for _, otherPod := range filteredPods {
-// 		klog.V(3).Infof("Range: Pod app: %v, Pod name: %v, phase %v", AppName(&otherPod), otherPod.Name, otherPod.Status.Phase)
-// 	}
-
-// 	return filteredPods, nil
-// }
-
-// func AreCompleteDependsOnCompleted(otherPods []v1.Pod, pod *v1.Pod) bool {
-// 	podCompleteDependsOn := CompleteDependsOnList(pod)
-// 	if len(podCompleteDependsOn) == 0 {
-// 		return true
-// 	}
-
-// 	if len(otherPods) == 0 {
-// 		return false
-// 	}
-
-// 	for _, otherPod := range otherPods {
-// 		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsCompleted((&otherPod)) {
-// 			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
-// 		}
-// 	}
-
-// 	return len(podCompleteDependsOn) == 0
-// }
-
-// func AreCompleteDependsOnRunning(otherPods []v1.Pod, pod *v1.Pod) bool {
-// 	podCompleteDependsOn := CompleteDependsOnList(pod)
-// 	if len(podCompleteDependsOn) == 0 {
-// 		return true
-// 	}
-
-// 	if len(otherPods) == 0 {
-// 		return false
-// 	}
-
-// 	for _, otherPod := range otherPods {
-// 		if helpers.StringInSlice(AppName(&otherPod), podCompleteDependsOn) && IsRunning((&otherPod)) {
-// 			podCompleteDependsOn = helpers.RemoveStringInSlice(AppName(&otherPod), podCompleteDependsOn)
-// 		}
-// 	}
-
-// 	return len(podCompleteDependsOn) == 0
-// }
-
-/* PODS END UTILS */
-
 /* POD MANAGEMENT DATA STRUCTURE */
 
 type SamplePodState struct {
@@ -217,19 +110,18 @@ func (podState SamplePodState) String() string {
 }
 
 type SamplePod struct {
-	app                    string
-	topology               string
-	scheduleTimeoutSeconds int
-	status                 string
-	statusUpdateAt         int64
-	skipScheduleTimes      int
-	completeDependsOn      map[string]*SamplePodState
-	runningDependsOn       map[string]*SamplePodState
+	app               string
+	topology          string
+	status            string
+	statusUpdateAt    int64
+	skipScheduleTimes int
+	completeDependsOn map[string]*SamplePodState
+	runningDependsOn  map[string]*SamplePodState
 }
 
 func (pod SamplePod) String() string {
-	return fmt.Sprintf("{app: %v, topology: %v,scheduleTimeoutSeconds:%v, status:%v, statusUpdateAt %v, runningDependsOn: %v, completeDependsOn: %v}",
-		pod.app, pod.topology, pod.scheduleTimeoutSeconds, pod.status, pod.statusUpdateAt, pod.runningDependsOn, pod.completeDependsOn)
+	return fmt.Sprintf("{app: %v, topology: %v, status:%v, statusUpdateAt %v, runningDependsOn: %v, completeDependsOn: %v}",
+		pod.app, pod.topology, pod.status, pod.statusUpdateAt, pod.runningDependsOn, pod.completeDependsOn)
 }
 
 func InitSamplePodsMap() map[string]*SamplePod {
@@ -252,7 +144,7 @@ func RemoveSamplePod(app string, samplePods map[string]*SamplePod) {
 	delete(samplePods, app)
 }
 
-func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int,
+func InitSamplePod(app string, topology string,
 	completeDependsOn []string, runningDependsOn []string, skipScheduleTimes int, samplePods map[string]*SamplePod) {
 	/* check if somebody else initialized this */
 	existingSamplePod, ok := samplePods[app]
@@ -268,7 +160,6 @@ func InitSamplePod(app string, topology string, scheduleTimeoutSeconds int,
 	samplePod := new(SamplePod)
 	samplePod.app = app
 	samplePod.topology = topology
-	samplePod.scheduleTimeoutSeconds = scheduleTimeoutSeconds
 	samplePod.skipScheduleTimes = skipScheduleTimes
 	samplePod.status = PENDING_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()

@@ -57,7 +57,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 	klog.V(3).Infof("Prefilter pod : %v, app : %v, running deps %v, complete deps %v",
 		pod.Name, podUtils.AppName(pod), podUtils.RunningDependsOnList(pod), podUtils.CompleteDependsOnList(pod))
 
-	podUtils.InitSamplePod(podUtils.AppName(pod), podUtils.TopologyName(pod), podUtils.ScheduleTimeout(pod),
+	podUtils.InitSamplePod(podUtils.AppName(pod), podUtils.TopologyName(pod),
 		podUtils.CompleteDependsOnList(pod), podUtils.RunningDependsOnList(pod), podUtils.SkipScheduleTimes(pod), pl.samplePods)
 	klog.V(3).Infof("Sample pods from prefilter", pl.samplePods[podUtils.AppName(pod)])
 
