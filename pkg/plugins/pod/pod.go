@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ilievlad73/scheduler-framework-sample/pkg/plugins/helpers"
 	v1 "k8s.io/api/core/v1"
@@ -21,6 +22,12 @@ const (
 	ERROR_STATUS              = "Error"
 	CONTAINER_CREATING_STATUS = "ContainerCreating"
 	UNDEFINED_STATUS          = ""
+
+	STAGE_1_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 5 * 1000
+	STAGE_2_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 15 * 1000
+	STAGE_3_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 30 * 1000
+	STAGE_4_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 45 * 1000
+	STAGE_5_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 55 * 1000
 
 	POD_RUNNING_HEALTY_TIMEOUT       = 15 * 1000
 	RUNNING_DEPENDS_ON_WAIT_TIMEOUT  = 30 * 1000
@@ -577,5 +584,27 @@ func AllowWaitingPods(sampleName string, handle framework.FrameworkHandle, sampl
 				waitingPod.Allow(sampleName)
 			}
 		}
+	})
+}
+
+func AllowWaitingPodAfterTime(sampleName string, handle framework.FrameworkHandle, samplePods map[string]*SamplePod) {
+	time.AfterFunc(time.Duration(STAGE_1_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS)*time.Second, func() {
+		AllowWaitingPods(sampleName, handle, samplePods)
+	})
+
+	time.AfterFunc(time.Duration(STAGE_2_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS)*time.Second, func() {
+		AllowWaitingPods(sampleName, handle, samplePods)
+	})
+
+	time.AfterFunc(time.Duration(STAGE_3_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS)*time.Second, func() {
+		AllowWaitingPods(sampleName, handle, samplePods)
+	})
+
+	time.AfterFunc(time.Duration(STAGE_4_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS)*time.Second, func() {
+		AllowWaitingPods(sampleName, handle, samplePods)
+	})
+
+	time.AfterFunc(time.Duration(STAGE_5_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS)*time.Second, func() {
+		AllowWaitingPods(sampleName, handle, samplePods)
 	})
 }
