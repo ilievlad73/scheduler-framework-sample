@@ -148,3 +148,53 @@ spec:
           image: vladalv/http-server:v1
           ports:
             - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-7
+  labels:
+    app: api-7
+spec:
+  selector:
+    matchLabels:
+      app: api-7
+  template:
+    metadata:
+      labels:
+        app: api-7
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+        running-depends-on: api-6
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-7
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-8
+  labels:
+    app: api-8
+spec:
+  selector:
+    matchLabels:
+      app: api-8
+  template:
+    metadata:
+      labels:
+        app: api-8
+        topology: apis-tp
+        scheduleTimeoutSeconds: "30"
+        running-depends-on: api-7
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: api-8
+          image: vladalv/http-server:v1
+          ports:
+            - containerPort: 8080
