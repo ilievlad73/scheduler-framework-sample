@@ -526,8 +526,11 @@ func AreRunninDependsOnPendingLessThanTwoLayers(pod *v1.Pod, samplePods map[stri
 	runningDependsOn := podSample.runningDependsOn
 	for dependencyPodName, dependencyPod := range runningDependsOn {
 		if dependencyPod.status != RUNNING_STATUS && dependencyPod.status != PENDING_STATUS {
-			dependencyRunningDependsOn := samplePods[dependencyPodName].runningDependsOn
-			for _, secondDependencyPod := range dependencyRunningDependsOn {
+			dependencySamplePod, ok := samplePods[dependencyPodName]
+			if !ok {
+				return false
+			}
+			for _, secondDependencyPod := range dependencySamplePod.runningDependsOn {
 				if secondDependencyPod.status != RUNNING_STATUS && secondDependencyPod.status != PENDING_STATUS {
 					return false
 				}
