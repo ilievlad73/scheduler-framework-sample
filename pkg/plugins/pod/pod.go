@@ -540,6 +540,7 @@ func ShouldSkipScheduler(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 /* PERMIT UTILS */
 /* TODO, reject waiting post on running if error */
 func AllowWaitingPods(sampleName string, handle framework.FrameworkHandle, samplePods map[string]*SamplePod) {
+	klog.Infof("Allowing waiting pods")
 	handle.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
 		pod := waitingPod.GetPod()
 		if AreRunningDependsOnRunningSince(pod, samplePods, POD_RUNNING_HEALTY_TIMEOUT) {
