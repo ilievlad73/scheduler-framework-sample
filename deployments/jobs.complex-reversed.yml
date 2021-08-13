@@ -1,13 +1,93 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+  name: job-10
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-10
+        topology: jobs-complex-tp
+        complete-depends-on: job-1__job-2__job-3__job-4__job-5__job-6__job-7__job-8__job-9
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: job-10
+          image: bash
+          command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-9
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-9
+        topology: jobs-complex-tp
+        complete-depends-on: job-2__job-4__job-5__job-6__job-7
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+      - name: job-9
+        image: bash
+        command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-8
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-8
+        topology: jobs-complex-tp
+        complete-depends-on: job-2__job-4__job-6__job-7
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: job-8
+          image: bash
+          command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-7
+spec:
+  template:
+    metadata:
+      labels:
+        app: job-7
+        topology: jobs-complex-tp
+        complete-depends-on: job-1__job-3__job-6
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+        - name: job-7
+          image: bash
+          command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+      restartPolicy: Never
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
   name: job-6
 spec:
   template:
     metadata:
       labels:
         app: job-6
-        topology: jobs-tp
+        topology: jobs-complex-tp
         complete-depends-on: job-4__job-5
     spec:
       schedulerName: scheduler-framework-sample
@@ -27,7 +107,7 @@ spec:
     metadata:
       labels:
         app: job-5
-        topology: jobs-tp
+        topology: jobs-complex-tp
         complete-depends-on: job-3
     spec:
       schedulerName: scheduler-framework-sample
@@ -47,7 +127,7 @@ spec:
     metadata:
       labels:
         app: job-4
-        topology: jobs-tp
+        topology: jobs-complex-tp
         complete-depends-on: job-3
     spec:
       schedulerName: scheduler-framework-sample
@@ -67,7 +147,7 @@ spec:
     metadata:
       labels:
         app: job-3
-        topology: jobs-tp
+        topology: jobs-complex-tp
         complete-depends-on: job-1__job-2
     spec:
       schedulerName: scheduler-framework-sample
@@ -87,7 +167,7 @@ spec:
     metadata:
       labels:
         app: job-2
-        topology: jobs-tp
+        topology: jobs-complex-tp
     spec:
       schedulerName: scheduler-framework-sample
       containers:
@@ -106,7 +186,7 @@ spec:
     metadata:
       labels:
         app: job-1
-        topology: jobs-tp
+        topology: jobs-complex-tp
     spec:
       schedulerName: scheduler-framework-sample
       containers:
