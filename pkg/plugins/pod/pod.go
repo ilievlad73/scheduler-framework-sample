@@ -23,6 +23,7 @@ const (
 	UNDEFINED_STATUS          = ""
 
 	POD_RUNNING_HEALTY_TIMEOUT = 20 * 1000
+	RUNNING_POD
 )
 
 func ScheduleTimeout(pod *v1.Pod) int {
