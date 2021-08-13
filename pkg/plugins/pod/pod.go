@@ -23,15 +23,15 @@ const (
 	CONTAINER_CREATING_STATUS = "ContainerCreating"
 	UNDEFINED_STATUS          = ""
 
-	STAGE_1_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 5 * 1000
-	STAGE_2_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 15 * 1000
-	STAGE_3_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 30 * 1000
-	STAGE_4_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 45 * 1000
-	STAGE_5_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 55 * 1000
+	STAGE_1_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 5
+	STAGE_2_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 15
+	STAGE_3_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 30
+	STAGE_4_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 45
+	STAGE_5_ALLOW_RUNNING_DEPENDS_ON_WAITING_PODS = 55
 
-	POD_RUNNING_HEALTY_TIMEOUT       = 15 * 1000
-	RUNNING_DEPENDS_ON_WAIT_TIMEOUT  = 30 * 1000
-	COMPLETE_DEPENDS_ON_WAIT_TIMEOUT = 30 * 1000
+	POD_RUNNING_HEALTY_TIMEOUT_MS    = 15 * 1000
+	RUNNING_DEPENDS_ON_WAIT_TIMEOUT  = 30
+	COMPLETE_DEPENDS_ON_WAIT_TIMEOUT = 30
 )
 
 func ScheduleTimeout(pod *v1.Pod) int {
@@ -577,7 +577,7 @@ func AllowWaitingPods(sampleName string, handle framework.FrameworkHandle, sampl
 	klog.Infof("Allowing waiting pods")
 	handle.IterateOverWaitingPods(func(waitingPod framework.WaitingPod) {
 		pod := waitingPod.GetPod()
-		if AreRunningDependsOnRunningSince(pod, samplePods, POD_RUNNING_HEALTY_TIMEOUT) {
+		if AreRunningDependsOnRunningSince(pod, samplePods, POD_RUNNING_HEALTY_TIMEOUT_MS) {
 			klog.Infof("[Informer] Pod %v passed running deps since check", pod.Name)
 			if AreCompleteDependsOnCompleted(pod, samplePods) {
 				klog.Infof("[Informer] Pod %v to passed complete deps check", pod.Name)

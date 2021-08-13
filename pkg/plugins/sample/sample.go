@@ -111,7 +111,7 @@ func (pl *Sample) Reserve(ctx context.Context, state *framework.CycleState, pod 
 func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (*framework.Status, time.Duration) {
 	klog.V(3).Infof("Permit the pod: %v", pod.Name)
 
-	if !podUtils.AreRunningDependsOnRunningSince(pod, pl.samplePods, podUtils.POD_RUNNING_HEALTY_TIMEOUT) {
+	if !podUtils.AreRunningDependsOnRunningSince(pod, pl.samplePods, podUtils.POD_RUNNING_HEALTY_TIMEOUT_MS) {
 		podUtils.AllowWaitingPodAfterTime(Name, pl.handle, pl.samplePods)
 
 		klog.Infof("Pod: %v is waiting to be scheduled to node due to running deps since: %v", pod.Name, nodeName)
