@@ -520,6 +520,24 @@ func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*Sam
 	return true
 }
 
+func AreRunninDependsOnPendingMoreThanTwoLayers(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
+	appName := AppName(pod)
+	podSample := samplePods[appName]
+	runningDependsOn := podSample.runningDependsOn
+	for _, dependencyPod := range runningDependsOn {
+		if dependencyPod.status != RUNNING_STATUS && dependencyPod.status != PENDING_STATUS {
+			dependencyRunningDependsOn := samplePods[AppName(dependencyPod)].runningDependsOn
+			for _, secondDependencyPod := range dependencyRunningDependsOn {
+				if secondDependencyPod.status != RUNNING_STATUS && secondDependencyPod.status != PENDING_STATUS {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
+}
+
 func ShouldSkipScheduler(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 	appName := AppName(pod)
 	podSample := samplePods[appName]
