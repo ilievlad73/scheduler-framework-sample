@@ -162,26 +162,26 @@ metadata:
   name: job-9
 spec:
   template:
-  metadata:
-    labels:
-    app: job-9
-    topology: jobs-complex-tp
-    complete-depends-on: job-2__job-4__job-5__job-6__job-7
-  spec:
-    schedulerName: scheduler-framework-sample
-    containers:
-    - name: job-9
+    metadata:
+      labels:
+        app: job-9
+        topology: jobs-complex-tp
+        complete-depends-on: job-2__job-4__job-5__job-6__job-7
+    spec:
+      schedulerName: scheduler-framework-sample
+      containers:
+      - name: job-9
         image: bash
         command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
-    restartPolicy: Never
+      restartPolicy: Never
   backoffLimit: 3
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: job-10
-  spec:
-    template:
+spec:
+  template:
     metadata:
       labels:
         app: job-10
@@ -191,7 +191,7 @@ metadata:
       schedulerName: scheduler-framework-sample
       containers:
         - name: job-10
-            image: bash
-            command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
-    restartPolicy: Never
+          image: bash
+          command: ["bash", "-c", "echo Started: $(date) && sleep 10 && echo Ended: $(date)"]
+      restartPolicy: Never
   backoffLimit: 3
