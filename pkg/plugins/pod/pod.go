@@ -523,15 +523,14 @@ func AreRunningDependsOnRunningOrPending(pod *v1.Pod, samplePods map[string]*Sam
 func ShouldSkipScheduler(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 	appName := AppName(pod)
 	podSample := samplePods[appName]
-	skipSchedulerTimes := podSample.skipScheduleTimes
 
-	if skipSchedulerTimes == 0 {
+	if podSample.skipScheduleTimes == 0 {
 		return false
 	}
 
-	klog.Infof("Skipping scheduler cycle due to skipSchedulerTimes %v", skipSchedulerTimes)
+	klog.Infof("Skipping scheduler cycle due to skipSchedulerTimes %v", podSample.skipScheduleTimes)
 
-	skipSchedulerTimes--
+	podSample.skipScheduleTimes--
 	return true
 }
 

@@ -13,6 +13,7 @@ spec:
       labels:
         app: api-1
         topology: apis-tp
+        skipSchedulerTimes: "1"
         scheduleTimeoutSeconds: "30"
     spec:
       schedulerName: scheduler-framework-sample
@@ -62,6 +63,7 @@ spec:
         app: api-3
         topology: apis-tp
         scheduleTimeoutSeconds: "30"
+        skipSchedulerTimes: "2"
         running-depends-on: api-1__api-2
     spec:
       schedulerName: scheduler-framework-sample
@@ -112,6 +114,7 @@ spec:
         app: api-5
         topology: apis-tp
         scheduleTimeoutSeconds: "30"
+        skipSchedulerTimes: "1"
         running-depends-on: api-3
     spec:
       schedulerName: scheduler-framework-sample
