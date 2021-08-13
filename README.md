@@ -24,4 +24,5 @@ $ kubectl apply -f ./deploy/
 ## Useful commands
 ```shell
 $ kubectl logs $(kubectl get pods -A | grep scheduler-framework | awk -F ' ' '{print $2}') -n kube-system -f
+$ kubectl get pods | awk -F ' ' '{print $1}' | tail -n +2 | xargs -n 1 kubectl logs
 ```
