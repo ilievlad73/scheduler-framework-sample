@@ -13,7 +13,7 @@ spec:
       labels:
         app: api
         topology: api-tp
-        skipSchedulerTimes: "3"
+        skipSchedulerTimes: "2"
         scheduleTimeoutSeconds: "30"
     spec:
       schedulerName: scheduler-framework-sample
