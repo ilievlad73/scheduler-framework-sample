@@ -22,8 +22,9 @@ const (
 	CONTAINER_CREATING_STATUS = "ContainerCreating"
 	UNDEFINED_STATUS          = ""
 
-	POD_RUNNING_HEALTY_TIMEOUT = 20 * 1000
-	RUNNING_POD
+	POD_RUNNING_HEALTY_TIMEOUT       = 15 * 1000
+	RUNNING_DEPENDS_ON_WAIT_TIMEOUT  = 30 * 1000
+	COMPLETE_DEPENDS_ON_WAIT_TIMEOUT = 30 * 1000
 )
 
 func ScheduleTimeout(pod *v1.Pod) int {
@@ -563,6 +564,7 @@ func ShouldSkipScheduler(pod *v1.Pod, samplePods map[string]*SamplePod) bool {
 /* END POD MANAGEMENT DATA STRUCTURE */
 
 /* PERMIT UTILS */
+
 /* TODO, reject waiting post on running if error */
 func AllowWaitingPods(sampleName string, handle framework.FrameworkHandle, samplePods map[string]*SamplePod) {
 	klog.Infof("Allowing waiting pods")

@@ -82,7 +82,7 @@ func (c *PodLoggingController) podUpdate(old, new interface{}) {
 	} else if podUtils.IsRunning(newPod) {
 		klog.Infof("[Informer] mark pod as running")
 		podUtils.MarkPodAsRunnning(newPod, c.samplePods)
-		time.AfterFunc(podUtils.POD_RUNNING_HEALTY_TIMEOUT*time.Second, func() {
+		time.AfterFunc(time.Duration(podUtils.POD_RUNNING_HEALTY_TIMEOUT)*time.Second, func() {
 			podUtils.AllowWaitingPods(c.sampleName, c.frameworkHandler, c.samplePods)
 		})
 	} else if podUtils.IsCompleted(newPod) {

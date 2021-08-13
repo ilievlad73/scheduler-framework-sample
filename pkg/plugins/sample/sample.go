@@ -112,17 +112,17 @@ func (pl *Sample) Permit(ctx context.Context, state *framework.CycleState, pod *
 	klog.V(3).Infof("Permit the pod: %v", pod.Name)
 
 	if !podUtils.AreRunningDependsOnRunningSince(pod, pl.samplePods, podUtils.POD_RUNNING_HEALTY_TIMEOUT) {
-		time.AfterFunc(podUtils.POD_RUNNING_HEALTY_TIMEOUT*time.Second, func() {
+		time.AfterFunc(time.Duration(podUtils.POD_RUNNING_HEALTY_TIMEOUT)*time.Second, func() {
 			podUtils.AllowWaitingPods(Name, pl.handle, pl.samplePods)
 		})
 
 		klog.Infof("Pod: %v is waiting to be scheduled to node due to running deps since: %v", pod.Name, nodeName)
-		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.ScheduleTimeout(pod)) * time.Second
+		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.RUNNING_DEPENDS_ON_WAIT_TIMEOUT) * time.Second
 	}
 
 	if !podUtils.AreCompleteDependsOnCompleted(pod, pl.samplePods) {
 		klog.Infof("Pod: %v is waiting to be scheduled to node due to complete deps: %v", pod.Name, nodeName)
-		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.ScheduleTimeout(pod)) * time.Second
+		return framework.NewStatus(framework.Wait, ""), time.Duration(podUtils.COMPLETE_DEPENDS_ON_WAIT_TIMEOUT) * time.Second
 	}
 
 	klog.V(3).Infof("Permit allows the pod: %v, app %v", pod.Name, podUtils.AppName(pod))
