@@ -71,7 +71,7 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
 
-	if podUtils.AreRunninDependsOnPendingOrRunningLessThanTwoLayers(pod, pl.samplePods) {
+	if !podUtils.AreRunninDependsOnPendingOrRunningLessThanTwoLayers(pod, pl.samplePods) {
 		klog.V(3).Infof("Reject due to AreRunninDependsOnPendingLessThanTwoLayers")
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
