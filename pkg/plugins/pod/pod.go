@@ -301,8 +301,12 @@ func MarkPodAsError(pod *v1.Pod, samplePods map[string]*SamplePod) {
 		klog.Infof("Mark pod as error failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
-
 	podTopology := samplePod.topology
+
+	if samplePod.status == ERROR_STATUS {
+		klog.Infof("Mark pod as error unnecessary", pod.Name)
+		return
+	}
 	/* mark on yourself */
 	samplePod.status = ERROR_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
@@ -335,8 +339,12 @@ func MarkPodAsUndefined(pod *v1.Pod, samplePods map[string]*SamplePod) {
 		klog.Infof("Mark pod as undefined failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
-
 	podTopology := samplePod.topology
+
+	if samplePod.status == UNDEFINED_STATUS {
+		klog.Infof("Mark pod as undefined unnecessary", pod.Name)
+		return
+	}
 	/* mark on yourself */
 	samplePod.status = UNDEFINED_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
@@ -369,8 +377,12 @@ func MarkPodAsPending(pod *v1.Pod, samplePods map[string]*SamplePod) {
 		klog.Infof("Mark pod as pending failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
-
 	podTopology := samplePod.topology
+
+	if samplePod.status == PENDING_STATUS {
+		klog.Infof("Mark pod as pending unnecessary", pod.Name)
+		return
+	}
 	/* mark on yourself */
 	samplePod.status = PENDING_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
@@ -403,8 +415,12 @@ func MarkPodAsRunnning(pod *v1.Pod, samplePods map[string]*SamplePod) {
 		klog.Infof("Mark pod as running failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
-
 	podTopology := samplePod.topology
+
+	if samplePod.status == RUNNING_STATUS {
+		klog.Infof("Mark pod as running unnecessary", pod.Name)
+		return
+	}
 	/* mark on yourself */
 	samplePod.status = RUNNING_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
@@ -438,8 +454,12 @@ func MarkPodAsCompleted(pod *v1.Pod, samplePods map[string]*SamplePod) {
 		klog.Infof("Mark pod as complete failed, pod %v not exists in data structure", pod.Name)
 		return
 	}
-
 	podTopology := samplePod.topology
+
+	if samplePod.status == COMPLETED_STATUS {
+		klog.Infof("Mark pod as complete unnecessary", pod.Name)
+		return
+	}
 	/* mark on yourself */
 	samplePod.status = COMPLETED_STATUS
 	samplePod.statusUpdateAt = helpers.GetCurrentTimestamp()
