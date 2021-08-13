@@ -531,7 +531,7 @@ func AreRunninDependsOnPendingOrRunningLessThanTwoLayers(pod *v1.Pod, samplePods
 				return false
 			}
 			for _, secondDependencyPod := range dependencySamplePod.runningDependsOn {
-				if secondDependencyPod.status != RUNNING_STATUS && secondDependencyPod.status != PENDING_STATUS {
+				if secondDependencyPod.status != RUNNING_STATUS {
 					return false
 				}
 			}
