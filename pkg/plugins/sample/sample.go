@@ -66,16 +66,6 @@ func (pl *Sample) PreFilter(ctx context.Context, state *framework.CycleState, po
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
 
-	return framework.NewStatus(framework.Success, "")
-}
-
-func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
-	return nil
-}
-
-func (pl *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
-	klog.V(3).Infof("Filter pod : %v", pod.Name)
-
 	if !podUtils.AreRunningDependsOnPendingOrRunning(pod, pl.samplePods) {
 		klog.V(3).Infof("Reject due to AreRunningDependsOnRunningOrPending")
 		return framework.NewStatus(framework.Unschedulable, "")
@@ -90,6 +80,16 @@ func (pl *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *
 		klog.V(3).Infof("Reject due to AreCompleteDependsOnRunningOrComplete")
 		return framework.NewStatus(framework.Unschedulable, "")
 	}
+
+	return framework.NewStatus(framework.Success, "")
+}
+
+func (pl *Sample) PreFilterExtensions() framework.PreFilterExtensions {
+	return nil
+}
+
+func (pl *Sample) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, node *nodeinfo.NodeInfo) *framework.Status {
+	klog.V(3).Infof("Filter pod : %v", pod.Name)
 
 	return framework.NewStatus(framework.Success, "")
 }
